@@ -18,10 +18,9 @@ app = Flask(__name__)
 #     "PAGE_ACCESS_TOKEN"] = "EAAF5JrI1h00BALc1R1OrZC2NBSPS9UQtFbPkzHS9YXwZC9ZAizFA3s1luLH6EwqpwtTzFrGpMG4SpfqbZALGdUbVaqus8DKD9lt4WEhMTGPkb5Rjsc34xRsks05olIjTbSO0fZAQmwbyC6BajbrxsiAZA3HYZAqvTnlZChfNTMFLXT7gW9DAJmRd"
 # os.environ["VERIFY_TOKEN"] = "test_token"
 
-print(Fore.CYAN)
-print("CONFIG:")
-print("PAGE_ACCESS_TOKEN: " + os.environ["PAGE_ACCESS_TOKEN"])
-print("VERIFY_TOKEN: " + os.environ["VERIFY_TOKEN"])
+print(Fore.CYAN, "CONFIG:")
+print(Fore.CYAN, "PAGE_ACCESS_TOKEN: " + os.environ["PAGE_ACCESS_TOKEN"])
+print(Fore.CYAN, "VERIFY_TOKEN: " + os.environ["VERIFY_TOKEN"])
 print(Style.RESET_ALL)
 
 threads = []
@@ -99,14 +98,14 @@ def run(id, url):
 
     t1.start()
     # t1.run()
-    print(Fore.GREEN+"t1 is running"+Style.RESET_ALL)
+    print(Fore.GREEN + "t1 is running" + Style.RESET_ALL)
 
 
 def check_link(url):
     if "grailed.com/feed" in url:
         return True
     else:
-        print(Fore.RED+"INVALID URL"+Style.RESET_ALL)
+        print(Fore.RED + "INVALID URL" + Style.RESET_ALL)
         return False
 
 
@@ -164,6 +163,8 @@ def webhook():
                     elif check_link(message_text):
                         send_message(sender_id, "Now watching: " + message_text)
                         run(sender_id, message_text)
+                    else:
+                        send_message(sender_id,"Send a Grailed link to monitor\nIt should look like this 'grailed.com/feed/randomstuff'\n\nSend RESET to stop monitoring all links")
 
                 if messaging_event.get("delivery"):  # delivery confirmation
                     pass
