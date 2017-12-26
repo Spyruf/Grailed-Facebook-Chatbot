@@ -106,15 +106,15 @@ def webhook():
 
                     if message_text == "RESET":
                         send_message(sender_id, "OK, will reset")
-
-                        global threads
-                        print(threads)
-                        print(len(threads))
-
-                        for t in threads:
-                            if sender_id in t.name:
-                                print("trying to end", t.name)
-                                t.stop()
+                        #
+                        # global threads
+                        # print(threads)
+                        # print(len(threads))
+                        #
+                        # for t in threads:
+                        #     if sender_id in t.name:
+                        #         print("trying to end", t.name)
+                        #         t.stop()
 
                     elif check_link(message_text):
                         send_message(sender_id, "Now watching: " + message_text)
