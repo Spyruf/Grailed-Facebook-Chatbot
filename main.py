@@ -11,6 +11,7 @@ import json
 import requests
 from flask import Flask, request
 
+
 # app = Flask(__name__)
 #
 #
@@ -98,13 +99,6 @@ from flask import Flask, request
 #     app.run(debug=True)
 
 
-print(Fore.GREEN + "Start" + Style.RESET_ALL)
-
-options = webdriver.ChromeOptions()
-options.add_argument('headless')
-driver = webdriver.Chrome(chrome_options=options)
-
-
 class MyClass():
 
     def __init__(self, url):
@@ -112,12 +106,16 @@ class MyClass():
         self.first_time = False
         self.old_items = set()
 
+        self.options = webdriver.ChromeOptions()
+        self.options.add_argument('headless')
+        self.driver = webdriver.Chrome(chrome_options=self.options)
+
     def get_listings(self):
         print(Fore.YELLOW + "Checking" + Style.RESET_ALL)
 
-        driver.get(self.url)
+        self.driver.get(self.url)
 
-        html = driver.page_source
+        html = self.driver.page_source
         soup = bs(html, "html.parser")
         listings = soup.find_all("div", class_="feed-item")
 
@@ -137,15 +135,15 @@ class MyClass():
     def start(self):
         while True:
             self.get_listings()
-            time.sleep(1)
+            time.sleep(1) # check for updates every second
 
-try:
 
-    links = ["https://www.grailed.com/feed/rn0qT30h5A", "https://www.grailed.com/feed/E9xeJRem6w"]
-    MyClass(links[0]).start()
+print(Fore.GREEN + "Start" + Style.RESET_ALL)
 
-except KeyboardInterrupt:
-    pass
+links = ["https://www.grailed.com/feed/rn0qT30h5A", "https://www.grailed.com/feed/E9xeJRem6w"]
 
-driver.quit()
-print(Fore.GREEN + "End" + Style.RESET_ALL)
+for url in links:
+    print(url)
+    x = MyClass(url)
+    t = Thread(target=x.start)
+    t.start()
