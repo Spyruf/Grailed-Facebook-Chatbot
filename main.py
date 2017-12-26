@@ -13,7 +13,7 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
-kill = "blank"
+threads = []
 
 
 @app.route('/', methods=['GET'])
@@ -47,14 +47,16 @@ def webhook():
                         "id"]  # the recipient's ID, which should be your page's facebook ID
                     message_text = messaging_event["message"]["text"]  # the message's text
 
-                    global kill
                     if message_text == "RESET":
                         send_message(sender_id, "OK, will reset")
-                        kill = sender_id
-                        print("kill is", kill)
+                        global threads
+                        print(threads)
+                        print(len(threads))
+                        for t in threads:
+                            t.kill = sender_id
+                            
 
                     elif check_link(message_text):
-                        kill = "blank"
                         send_message(sender_id, "Now watching: " + message_text)
                         run(sender_id, message_text)
 
@@ -117,6 +119,8 @@ class MyClass:
         self.first_time = False
         self.old_items = set()
 
+        self.kill = "blob"
+
         self.options = webdriver.ChromeOptions()
         self.options.add_argument('headless')
         self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
@@ -147,11 +151,10 @@ class MyClass:
         self.old_items = current_items
 
     def start(self):
-        global kill
 
-        while kill != self.sender_id:
+        while self.kill != self.sender_id:
             self.get_listings()
-            print("kill in class is", kill)
+            print("kill in class is", self.kill)
             print("id in class is", self.sender_id)
             time.sleep(10)  # check for updates every second
 
@@ -165,6 +168,8 @@ def run(id, url):
     x = MyClass(id, url)
     t = Thread(target=x.start, name=str(id) + url)
     t.start()
+
+    threads.append(t)
 
 
 def check_link(url):
