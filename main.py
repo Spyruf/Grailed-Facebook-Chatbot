@@ -106,24 +106,24 @@ def webhook():
                         "id"]  # the recipient's ID, which should be your page's facebook ID
                     message_text = messaging_event["message"]["text"]  # the message's text
 
-                    # if message_text == "RESET":
-                    #     send_message(sender_id, "OK, will reset")
-                    #
-                    #     global threads
-                    #     # print(threads)
-                    #     # print(len(threads))
-                    #
-                    #     for t in threads:
-                    #         print(t)
-                    #         print("thread name is", str(t.name))
-                    #         print("sender id is", sender_id)
-                    #         if sender_id in str(t.name):
-                    #             print("trying to end", str(t.name))
-                    #             t.stop()
-                    #
-                    # elif check_link(message_text):
-                    #     send_message(sender_id, "Now watching: " + message_text)
-                    #     run(sender_id, message_text)
+                    if message_text == "RESET":
+                        send_message(sender_id, "OK, will reset")
+
+                        global threads
+                        # print(threads)
+                        # print(len(threads))
+
+                        for t in threads:
+                            print(t)
+                            print("thread name is", str(t.name))
+                            print("sender id is", sender_id)
+                            if sender_id in str(t.name):
+                                print("trying to end", str(t.name))
+                                t.stop()
+
+                    elif check_link(message_text):
+                        send_message(sender_id, "Now watching: " + message_text)
+                        run(sender_id, message_text)
 
                 if messaging_event.get("delivery"):  # delivery confirmation
                     pass
