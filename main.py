@@ -54,8 +54,8 @@ def webhook():
                         print("kill is", kill)
 
                     elif check_link(message_text):
-                        send_message(sender_id, "Now watching: " + message_text)
                         kill = ""
+                        send_message(sender_id, "Now watching: " + message_text)
                         run(sender_id, message_text)
 
                 if messaging_event.get("delivery"):  # delivery confirmation
@@ -141,15 +141,16 @@ class MyClass:
             print("New Items!!")
             for item in diff:
                 print("https://www.grailed.com" + item)
-                # send_message(id, "https://www.grailed.com" + item)
+                send_message(id, "https://www.grailed.com" + item)
         else:
             self.first_time = False
         self.old_items = current_items
 
     def start(self):
         global kill
+        print("kill in class is", kill)
+        print("id in class is", self.sender_id)
         while kill != self.sender_id:
-            print("kill in class is", kill)
             self.get_listings()
             time.sleep(10)  # check for updates every second
         print("Killing Thread" + self.sender_id)
