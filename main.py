@@ -23,7 +23,7 @@ class CustomThread():  # threading.Thread
 
         self.sender_id = id
         self.url = url
-        self.first_time = False
+        self.first_time = True
         self.old_items = set()
 
         self.name = str(id) + url
