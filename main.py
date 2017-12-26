@@ -1,5 +1,6 @@
 import time, datetime
 from threading import Thread
+import threading
 from selenium import webdriver
 from bs4 import BeautifulSoup as bs
 from colorama import Fore, Back, Style
@@ -54,6 +55,7 @@ def webhook():
                         print(len(threads))
                         for t in threads:
                             t.kill = sender_id
+                            print(threading.get_ident(t))
                             print(t.kill)
 
                     elif check_link(message_text):
@@ -167,9 +169,10 @@ def run(id, url):
     # url = "https://www.grailed.com/feed/rn0qT30h5A"
     x = MyClass(id, url)
     t = Thread(target=x.start, name=str(id) + url)
-    t.start()
-
+    global threads
     threads.append(t)
+
+    t.start()
 
 
 def check_link(url):
