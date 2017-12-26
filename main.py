@@ -16,14 +16,14 @@ app = Flask(__name__)
 threads = []
 
 
-class CustomThread(threading.Thread):
+class CustomThread():  # threading.Thread
 
     def __init__(self, id, url):
-        super(CustomThread, self).__init__()
+        # super(CustomThread, self).__init__()
 
         self.sender_id = id
         self.url = url
-        self.first_time = True
+        self.first_time = False
         self.old_items = set()
 
         self.name = str(id) + url
@@ -66,7 +66,7 @@ class CustomThread(threading.Thread):
             self.get_listings()
             # print("kill in class is", self.kill)
             # print("id in class is", self.sender_id)
-            time.sleep(60)  # check for updates every second
+            time.sleep(10)  # check for updates every x seconds
 
         print("Killing Thread" + self.sender_id)
         exit()
@@ -181,15 +181,17 @@ if __name__ == '__main__':
 
 def run(id, url):
     print(Fore.GREEN + "Start" + Style.RESET_ALL)
-    # url = "https://www.grailed.com/feed/rn0qT30h5A"
+    url = "https://www.grailed.com/feed/rn0qT30h5A"
     t1 = CustomThread(id, url)
 
     # t = Thread(target=x.start, name=str(id) + url)
     global threads
     threads.append(t1)
-    print(threads)
+    for item in threads:
+        print(item.name)
 
-    t1.start()
+    # t1.start()
+    t1.run()
 
 
 def check_link(url):
@@ -198,5 +200,6 @@ def check_link(url):
     else:
         print("INVALID URL")
         return False
+
 
 # run(5, "https://www.grailed.com/feed/rn0qT30h5A")
