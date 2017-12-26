@@ -16,6 +16,61 @@ app = Flask(__name__)
 threads = []
 
 
+class MyClass:
+
+    def __init__(self, id, url):
+        self.sender_id = id
+        self.url = url
+        self.first_time = False
+        self.old_items = set()
+
+        self.kill = "blob"
+        self.run = True
+
+        self.options = webdriver.ChromeOptions()
+        self.options.add_argument('headless')
+        self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
+        self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
+
+    def get_listings(self):
+        print(Fore.YELLOW + "Checking" + Style.RESET_ALL)
+
+        self.driver.get(self.url)
+
+        html = self.driver.page_source
+        soup = bs(html, "html.parser")
+        listings = soup.find_all("div", class_="feed-item")
+
+        current_items = set()
+        for item in listings:
+            if item.a is not None:
+                current_items.add(item.a.get("href"))
+
+        diff = current_items.difference(self.old_items)
+        if diff and self.first_time is not True:
+            print("New Items!!")
+            for item in diff:
+                print("https://www.grailed.com" + item)
+                send_message(self.sender_id, "https://www.grailed.com" + item)
+        else:
+            self.first_time = False
+        self.old_items = current_items
+
+    def start(self):
+
+        while self.run:
+            self.get_listings()
+            # print("kill in class is", self.kill)
+            # print("id in class is", self.sender_id)
+            time.sleep(5)  # check for updates every second
+
+        print("Killing Thread" + self.sender_id)
+        exit()
+
+    def stop(self):
+        self.run = False
+
+
 @app.route('/', methods=['GET'])
 def verify():
     # when the endpoint is registered as a webhook, it must echo back
@@ -47,7 +102,7 @@ def webhook():
                         "id"]  # the recipient's ID, which should be your page's facebook ID
                     message_text = messaging_event["message"]["text"]  # the message's text
 
-                    if message_text == "RESET":
+                    if message_text == "reset":
                         send_message(sender_id, "OK, will reset")
 
                         global threads
@@ -56,6 +111,7 @@ def webhook():
 
                         for t in threads:
                             if sender_id in t.name:
+                                print("trying to end", t.name)
                                 t.stop()
 
                     elif check_link(message_text):
@@ -111,61 +167,6 @@ def log(msg, *args, **kwargs):  # simple wrapper for logging to stdout on heroku
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-class MyClass:
-
-    def __init__(self, id, url):
-        self.sender_id = id
-        self.url = url
-        self.first_time = False
-        self.old_items = set()
-
-        self.kill = "blob"
-        self.run = True
-
-        self.options = webdriver.ChromeOptions()
-        self.options.add_argument('headless')
-        self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
-        self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
-
-    def get_listings(self):
-        print(Fore.YELLOW + "Checking" + Style.RESET_ALL)
-
-        self.driver.get(self.url)
-
-        html = self.driver.page_source
-        soup = bs(html, "html.parser")
-        listings = soup.find_all("div", class_="feed-item")
-
-        current_items = set()
-        for item in listings:
-            if item.a is not None:
-                current_items.add(item.a.get("href"))
-
-        diff = current_items.difference(self.old_items)
-        if diff and self.first_time is not True:
-            print("New Items!!")
-            for item in diff:
-                print("https://www.grailed.com" + item)
-                send_message(self.sender_id, "https://www.grailed.com" + item)
-        else:
-            self.first_time = False
-        self.old_items = current_items
-
-    def start(self):
-
-        while self.run:
-            self.get_listings()
-            # print("kill in class is", self.kill)
-            # print("id in class is", self.sender_id)
-            time.sleep(5)  # check for updates every second
-
-        print("Killing Thread" + self.sender_id)
-        exit()
-
-    def stop(self):
-        self.run = False
 
 
 def run(id, url):
