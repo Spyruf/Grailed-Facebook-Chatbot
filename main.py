@@ -13,13 +13,24 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
+# Config
+os.environ[
+    "PAGE_ACCESS_TOKEN"] = "EAAF5JrI1h00BALc1R1OrZC2NBSPS9UQtFbPkzHS9YXwZC9ZAizFA3s1luLH6EwqpwtTzFrGpMG4SpfqbZALGdUbVaqus8DKD9lt4WEhMTGPkb5Rjsc34xRsks05olIjTbSO0fZAQmwbyC6BajbrxsiAZA3HYZAqvTnlZChfNTMFLXT7gW9DAJmRd"
+os.environ["VERIFY_TOKEN"] = "test_token"
+
+print(Fore.CYAN)
+print("CONFIG:")
+print("PAGE_ACCESS_TOKEN: " + os.environ["PAGE_ACCESS_TOKEN"])
+print("VERIFY_TOKEN: " + os.environ["VERIFY_TOKEN"])
+print(Style.RESET_ALL)
+
 threads = []
 
 
-class CustomThread():  # threading.Thread
+class CustomThread(threading.Thread):  #
 
     def __init__(self, id, url):
-        # super(CustomThread, self).__init__()
+        super(CustomThread, self).__init__()
 
         self.sender_id = id
         self.url = url
@@ -33,7 +44,7 @@ class CustomThread():  # threading.Thread
 
         self.options = webdriver.ChromeOptions()
         self.options.add_argument('headless')
-        self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
+        # self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
         self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
 
     def get_listings(self):
@@ -75,6 +86,30 @@ class CustomThread():  # threading.Thread
         self.running = False
 
 
+def run(id, url):
+    print(Fore.GREEN + "Start" + Style.RESET_ALL)
+    url = "https://www.grailed.com/feed/rn0qT30h5A"
+    t1 = CustomThread(id, url)
+
+    # t = Thread(target=x.start, name=str(id) + url)
+    global threads
+    threads.append(t1)
+    for item in threads:
+        print(item.name)
+
+    t1.start()
+    # t1.run()
+    print(Fore.GREEN+"t1 is running"+Style.RESET_ALL)
+
+
+def check_link(url):
+    if "grailed.com/feed" in url:
+        return True
+    else:
+        print(Fore.RED+"INVALID URL"+Style.RESET_ALL)
+        return False
+
+
 @app.route('/', methods=['GET'])
 def verify():
     # when the endpoint is registered as a webhook, it must echo back
@@ -106,29 +141,29 @@ def webhook():
                         "id"]  # the recipient's ID, which should be your page's facebook ID
                     message_text = messaging_event["message"]["text"]  # the message's text
 
-                    send_message(sender_id,"OK" + message_text)
+                    send_message(sender_id, "Message Recieved: " + message_text)
 
-                    # if message_text == "RESET":
-                    #     send_message(sender_id, "OK, will reset")
-                    #
-                    #     global threads
-                    #     time.sleep(5)
-                    #
-                    #     print(threads)
-                    #     print(len(threads))
-                    #
-                    #     for t in threads:
-                    #         print(t)
-                    #         if t.name is not None:
-                    #             print("thread name is", str(t.name))
-                    #             print("sender id is", sender_id)
-                    #             if sender_id in str(t.name):
-                    #                 print("trying to end", str(t.name))
-                    #                 t.stop()
-                    #
-                    # elif check_link(message_text):
-                    #     send_message(sender_id, "Now watching: " + message_text)
-                    #     run(sender_id, message_text)
+                    if message_text == "RESET":
+                        send_message(sender_id, "OK, will reset")
+
+                        global threads
+                        # time.sleep(5)
+
+                        print(threads)
+                        print(len(threads))
+
+                        for t in threads:
+                            print(t)
+                            if t.name is not None:
+                                print("thread name is", str(t.name))
+                                print("sender id is", sender_id)
+                                if sender_id in str(t.name):
+                                    print("trying to end", str(t.name))
+                                    t.stop()
+
+                    elif check_link(message_text):
+                        send_message(sender_id, "Now watching: " + message_text)
+                        run(sender_id, message_text)
 
                 if messaging_event.get("delivery"):  # delivery confirmation
                     pass
@@ -179,29 +214,5 @@ def log(msg, *args, **kwargs):  # simple wrapper for logging to stdout on heroku
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-def run(id, url):
-    print(Fore.GREEN + "Start" + Style.RESET_ALL)
-    url = "https://www.grailed.com/feed/rn0qT30h5A"
-    t1 = CustomThread(id, url)
-
-    # t = Thread(target=x.start, name=str(id) + url)
-    global threads
-    threads.append(t1)
-    for item in threads:
-        print(item.name)
-
-    # t1.start()
-    t1.run()
-
-
-def check_link(url):
-    if "grailed.com/feed" in url:
-        return True
-    else:
-        print("INVALID URL")
-        return False
-
 
 # run(5, "https://www.grailed.com/feed/rn0qT30h5A")
