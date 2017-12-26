@@ -129,7 +129,8 @@ class MyClass:
         if diff and self.first_time is not True:
             print("New Items!!")
             for item in diff:
-                send_message(id, item)
+                print(item)
+                # send_message(id, item)
         else:
             self.first_time = False
         self.old_items = current_items
@@ -151,3 +152,5 @@ def run(id, url):
 
 def check_link(url):
     return True
+
+run(5,5)
