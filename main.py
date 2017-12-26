@@ -55,7 +55,7 @@ def webhook():
                         print(len(threads))
 
                         for t in threads:
-                            if sender_id in str(t.get_ident()):
+                            if sender_id in t.name:
                                 t.stop()
 
                     elif check_link(message_text):
