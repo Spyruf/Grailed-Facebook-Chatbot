@@ -45,7 +45,8 @@ def webhook():
                         "id"]  # the recipient's ID, which should be your page's facebook ID
                     message_text = messaging_event["message"]["text"]  # the message's text
 
-                    send_message(sender_id, "roger that!")
+                    if check_link(message_text):
+                        run(sender_id, message_text)
 
                 if messaging_event.get("delivery"):  # delivery confirmation
                     pass
@@ -100,7 +101,8 @@ if __name__ == '__main__':
 
 class MyClass:
 
-    def __init__(self, url):
+    def __init__(self, id, url):
+        self.sender_id = id
         self.url = url
         self.first_time = False
         self.old_items = set()
@@ -126,7 +128,8 @@ class MyClass:
         diff = current_items.difference(self.old_items)
         if diff and self.first_time is not True:
             print("New Items!!")
-            print(diff)
+            for item in diff:
+                send_message(id, item)
         else:
             self.first_time = False
         self.old_items = current_items
@@ -137,13 +140,17 @@ class MyClass:
             time.sleep(1)  # check for updates every second
 
 
-def run():
+def run(id, url):
     print(Fore.GREEN + "Start" + Style.RESET_ALL)
 
-    links = ["https://www.grailed.com/feed/rn0qT30h5A", "https://www.grailed.com/feed/E9xeJRem6w"]
+    url = "https://www.grailed.com/feed/rn0qT30h5A"
+    x = MyClass(id, url)
+    t = Thread(target=x.start, name=str(id) + url)
+    t.start()
 
-    for url in links:
-        print(url)
-        x = MyClass(url)
-        t = Thread(target=x.start)
-        t.start()
+
+def check_link(url):
+    return True
+
+
+run(5, 5)
