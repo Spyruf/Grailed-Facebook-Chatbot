@@ -13,7 +13,7 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
-kill = ""
+kill = "blank"
 
 
 @app.route('/', methods=['GET'])
@@ -54,7 +54,7 @@ def webhook():
                         print("kill is", kill)
 
                     elif check_link(message_text):
-                        kill = ""
+                        kill = "blank"
                         send_message(sender_id, "Now watching: " + message_text)
                         run(sender_id, message_text)
 
@@ -148,11 +148,13 @@ class MyClass:
 
     def start(self):
         global kill
-        print("kill in class is", kill)
-        print("id in class is", self.sender_id)
+
         while kill != self.sender_id:
             self.get_listings()
+            print("kill in class is", kill)
+            print("id in class is", self.sender_id)
             time.sleep(10)  # check for updates every second
+
         print("Killing Thread" + self.sender_id)
         exit()
 
