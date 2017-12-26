@@ -109,11 +109,12 @@ def webhook():
                     if message_text == "RESET":
                         send_message(sender_id, "OK, will reset")
 
-                        # global threads
+                        global threads
                         # print(threads)
                         # print(len(threads))
 
                         for t in threads:
+                            print(t.name)
                             print("thread name is", str(t.name))
                             print("sender id is", sender_id)
                             if sender_id in str(t.name):
