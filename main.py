@@ -114,7 +114,7 @@ def webhook():
                         # print(len(threads))
 
                         for t in threads:
-                            print(t.name)
+                            print(t)
                             print("thread name is", str(t.name))
                             print("sender id is", sender_id)
                             if sender_id in str(t.name):
@@ -182,7 +182,7 @@ def run(id, url):
     t1 = CustomThread(id, url)
 
     # t = Thread(target=x.start, name=str(id) + url)
-    # global threads
+    global threads
     threads.append(t1)
     print(threads)
 
