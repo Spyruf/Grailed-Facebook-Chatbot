@@ -109,7 +109,7 @@ class MyClass:
 
         self.options = webdriver.ChromeOptions()
         self.options.add_argument('headless')
-        self.driver = webdriver.Chrome(chrome_options=self.options)
+        self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
 
     def get_listings(self):
         print(Fore.YELLOW + "Checking" + Style.RESET_ALL)
