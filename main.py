@@ -16,6 +16,9 @@ driver = webdriver.Chrome(chrome_options=options)
 
 
 def get_listings():
+    # threading.Timer(5.0, get_listings).start()
+    print(Fore.YELLOW + "Checking" + Style.RESET_ALL)
+
     global url, old_items
     driver.get(url)
 
@@ -28,11 +31,18 @@ def get_listings():
         if item.a is not None:
             current_items.add(item.a.get("href"))
 
-    print(current_items.difference(old_items))
+    diff = current_items.difference(old_items)
+    if diff:
+        print(diff)
     old_items = current_items
 
 
-get_listings()
+try:
+    while True:
+        get_listings()
+        time.sleep(5)
+except KeyboardInterrupt:
+    pass
 
 driver.quit()
 print(Fore.GREEN + "End" + Style.RESET_ALL)
