@@ -189,6 +189,9 @@ def run(id, url):
 
 
 def check_link(url):
-    return True
+    if "grailed.com/feed" in url:
+        return True
+    else:
+        return False
 
 # run(5, "https://www.grailed.com/feed/rn0qT30h5A")
