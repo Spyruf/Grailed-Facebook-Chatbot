@@ -26,6 +26,8 @@ class CustomThread(threading.Thread):
         self.first_time = True
         self.old_items = set()
 
+        self.name = str(id) + url
+
         self.kill = "blob"
         self.running = True
 
