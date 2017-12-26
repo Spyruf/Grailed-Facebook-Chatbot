@@ -1,6 +1,5 @@
 import time, datetime
 from threading import Thread
-import threading
 from selenium import webdriver
 from bs4 import BeautifulSoup as bs
 from colorama import Fore, Back, Style
@@ -50,13 +49,12 @@ def webhook():
 
                     if message_text == "RESET":
                         send_message(sender_id, "OK, will reset")
+
                         global threads
                         print(threads)
                         print(len(threads))
+
                         for t in threads:
-                            t.kill = sender_id
-                            print(t.get_ident(), "or", t.name)
-                            print("after setting kill it is", t.kill)
                             if sender_id in str(t.get_ident()):
                                 t.stop()
 
@@ -124,6 +122,7 @@ class MyClass:
         self.old_items = set()
 
         self.kill = "blob"
+        self.run = True
 
         self.options = webdriver.ChromeOptions()
         self.options.add_argument('headless')
@@ -156,14 +155,17 @@ class MyClass:
 
     def start(self):
 
-        while self.kill != self.sender_id:
+        while self.run:
             self.get_listings()
-            print("kill in class is", self.kill)
-            print("id in class is", self.sender_id)
-            time.sleep(10)  # check for updates every second
+            # print("kill in class is", self.kill)
+            # print("id in class is", self.sender_id)
+            time.sleep(5)  # check for updates every second
 
         print("Killing Thread" + self.sender_id)
         exit()
+
+    def stop(self):
+        self.run = False
 
 
 def run(id, url):
