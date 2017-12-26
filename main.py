@@ -1,5 +1,5 @@
 import time, datetime
-import threading
+from threading import Thread
 from selenium import webdriver
 from bs4 import BeautifulSoup as bs
 from colorama import Fore, Back, Style
@@ -97,13 +97,7 @@ from flask import Flask, request
 # if __name__ == '__main__':
 #     app.run(debug=True)
 
-# Config
-first_time = False
-url = "https://www.grailed.com/feed/rn0qT30h5A"
-# https://www.grailed.com/feed/E9xeJRem6w
-old_items = set()
 
-# Set Up
 print(Fore.GREEN + "Start" + Style.RESET_ALL)
 
 options = webdriver.ChromeOptions()
@@ -111,35 +105,45 @@ options.add_argument('headless')
 driver = webdriver.Chrome(chrome_options=options)
 
 
-def get_listings():
-    # threading.Timer(5.0, get_listings).start()
-    print(Fore.YELLOW + "Checking" + Style.RESET_ALL)
+class MyClass():
 
-    global url, old_items, first_time
-    driver.get(url)
+    def __init__(self, url):
+        self.url = url
+        self.first_time = False
+        self.old_items = set()
 
-    html = driver.page_source
-    soup = bs(html, "html.parser")
-    listings = soup.find_all("div", class_="feed-item")
+    def get_listings(self):
+        print(Fore.YELLOW + "Checking" + Style.RESET_ALL)
 
-    current_items = set()
-    for item in listings:
-        if item.a is not None:
-            current_items.add(item.a.get("href"))
+        driver.get(self.url)
 
-    diff = current_items.difference(old_items)
-    if diff and first_time is not True:
-        print("New Items!!")
-        print(diff)
-    else:
-        first_time = False
-    old_items = current_items
+        html = driver.page_source
+        soup = bs(html, "html.parser")
+        listings = soup.find_all("div", class_="feed-item")
 
+        current_items = set()
+        for item in listings:
+            if item.a is not None:
+                current_items.add(item.a.get("href"))
+
+        diff = current_items.difference(self.old_items)
+        if diff and self.first_time is not True:
+            print("New Items!!")
+            print(diff)
+        else:
+            self.first_time = False
+        self.old_items = current_items
+
+    def start(self):
+        while True:
+            self.get_listings()
+            time.sleep(1)
 
 try:
-    while True:
-        get_listings()
-        time.sleep(5)
+
+    links = ["https://www.grailed.com/feed/rn0qT30h5A", "https://www.grailed.com/feed/E9xeJRem6w"]
+    MyClass(links[0]).start()
+
 except KeyboardInterrupt:
     pass
 
