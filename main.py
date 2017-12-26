@@ -45,9 +45,9 @@ def webhook():
                         "id"]  # the recipient's ID, which should be your page's facebook ID
                     message_text = messaging_event["message"]["text"]  # the message's text
 
-                    send_message(sender_id, "roger that")
-                    if check_link(message_text):
-                        run(sender_id, message_text)
+                    send_message(sender_id, "Now watching: " + message_text)
+                    # if check_link(message_text):
+                    #     run(sender_id, message_text)
 
                 if messaging_event.get("delivery"):  # delivery confirmation
                     pass
@@ -154,6 +154,3 @@ def run(id, url):
 
 def check_link(url):
     return True
-
-
-run(5, 5)
