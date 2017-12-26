@@ -27,7 +27,7 @@ class CustomThread(threading.Thread):
         self.old_items = set()
 
         self.kill = "blob"
-        self.run = True
+        self.running = True
 
         self.options = webdriver.ChromeOptions()
         self.options.add_argument('headless')
@@ -60,7 +60,7 @@ class CustomThread(threading.Thread):
 
     def run(self):
 
-        while self.run:
+        while self.running:
             self.get_listings()
             # print("kill in class is", self.kill)
             # print("id in class is", self.sender_id)
@@ -70,7 +70,7 @@ class CustomThread(threading.Thread):
         exit()
 
     def stop(self):
-        self.run = False
+        self.running = False
 
 
 @app.route('/', methods=['GET'])
@@ -114,7 +114,7 @@ def webhook():
                         for t in threads:
                             if sender_id in t.name:
                                 print("trying to end", t.name)
-                                # t.stop()
+                                t.stop()
 
                     elif check_link(message_text):
                         send_message(sender_id, "Now watching: " + message_text)
