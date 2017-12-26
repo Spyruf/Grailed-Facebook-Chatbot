@@ -1,5 +1,4 @@
 import time, datetime
-from threading import Thread
 import threading
 from selenium import webdriver
 from bs4 import BeautifulSoup as bs
@@ -17,7 +16,7 @@ app = Flask(__name__)
 threads = []
 
 
-class CustomThread:
+class CustomThread(threading.Thread):
 
     def __init__(self, id, url):
         super(CustomThread, self).__init__()
@@ -59,6 +58,8 @@ class CustomThread:
         self.old_items = current_items
 
     def start(self):
+
+        super(CustomThread, self).start()
 
         while self.run:
             self.get_listings()
