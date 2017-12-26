@@ -180,7 +180,7 @@ def run(id, url):
     global threads
     threads.append(t1)
 
-    t1.start()
+    # t1.start()
 
 
 def check_link(url):
