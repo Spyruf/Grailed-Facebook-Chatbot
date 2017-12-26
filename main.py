@@ -1,5 +1,6 @@
 import time, datetime
 from threading import Thread
+import threading
 from selenium import webdriver
 from bs4 import BeautifulSoup as bs
 from colorama import Fore, Back, Style
@@ -16,9 +17,10 @@ app = Flask(__name__)
 threads = []
 
 
-class MyClass:
+class CustomThread:
 
     def __init__(self, id, url):
+        super(CustomThread, self).__init__()
         self.sender_id = id
         self.url = url
         self.first_time = False
@@ -172,12 +174,13 @@ if __name__ == '__main__':
 def run(id, url):
     print(Fore.GREEN + "Start" + Style.RESET_ALL)
     # url = "https://www.grailed.com/feed/rn0qT30h5A"
-    x = MyClass(id, url)
-    t = Thread(target=x.start, name=str(id) + url)
-    global threads
-    threads.append(t)
+    t1 = CustomThread(id, url)
 
-    t.start()
+    # t = Thread(target=x.start, name=str(id) + url)
+    global threads
+    threads.append(t1)
+
+    t1.start()
 
 
 def check_link(url):
