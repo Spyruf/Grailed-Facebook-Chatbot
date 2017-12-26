@@ -151,6 +151,3 @@ def run(id, url):
 
 def check_link(url):
     return True
-
-
-run(5, 5)
