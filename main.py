@@ -47,9 +47,11 @@ def webhook():
                         "id"]  # the recipient's ID, which should be your page's facebook ID
                     message_text = messaging_event["message"]["text"]  # the message's text
 
+                    global kill
                     if message_text == "RESET":
                         send_message(sender_id, "OK, will reset")
                         kill = sender_id
+                        print("kill is", kill)
 
                     elif check_link(message_text):
                         send_message(sender_id, "Now watching: " + message_text)
@@ -145,9 +147,11 @@ class MyClass:
         self.old_items = current_items
 
     def start(self):
+        global kill
         while kill != self.sender_id:
+            print("kill in class is", kill)
             self.get_listings()
-            time.sleep(1)  # check for updates every second
+            time.sleep(10)  # check for updates every second
         print("Killing Thread" + self.sender_id)
         exit()
 
