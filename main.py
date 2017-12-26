@@ -23,7 +23,7 @@ class CustomThread:
         super(CustomThread, self).__init__()
         self.sender_id = id
         self.url = url
-        self.first_time = False
+        self.first_time = True
         self.old_items = set()
 
         self.kill = "blob"
