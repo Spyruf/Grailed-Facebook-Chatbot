@@ -140,7 +140,7 @@ def webhook():
                         "id"]  # the recipient's ID, which should be your page's facebook ID
                     message_text = messaging_event["message"]["text"]  # the message's text
 
-                    send_message(sender_id, "Message Recieved: " + message_text)
+                    # send_message(sender_id, "Message Recieved: " + message_text)
 
                     if message_text == "RESET":
                         send_message(sender_id, "OK, will reset")
@@ -164,7 +164,7 @@ def webhook():
                         send_message(sender_id, "Now watching: " + message_text)
                         run(sender_id, message_text)
                     else:
-                        send_message(sender_id,"Send a Grailed link to monitor\nIt should look like this 'grailed.com/feed/randomstuff'\n\nSend RESET to stop monitoring all links")
+                        send_message(sender_id,"Send a Grailed link to monitor\nIt should look like this 'https://www.grailed.com/feed/E9xeJRem6w'\n\nSend RESET to stop monitoring all links")
 
                 if messaging_event.get("delivery"):  # delivery confirmation
                     pass
