@@ -20,6 +20,7 @@ class CustomThread(threading.Thread):
 
     def __init__(self, id, url):
         super(CustomThread, self).__init__()
+
         self.sender_id = id
         self.url = url
         self.first_time = True
@@ -57,9 +58,7 @@ class CustomThread(threading.Thread):
             self.first_time = False
         self.old_items = current_items
 
-    def start(self):
-
-        super(CustomThread, self).start()
+    def run(self):
 
         while self.run:
             self.get_listings()
@@ -181,7 +180,7 @@ def run(id, url):
     global threads
     threads.append(t1)
 
-    t1.start()
+    # t1.start()
 
 
 def check_link(url):
