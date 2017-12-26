@@ -13,6 +13,8 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
+kill = ""
+
 
 @app.route('/', methods=['GET'])
 def verify():
@@ -45,9 +47,14 @@ def webhook():
                         "id"]  # the recipient's ID, which should be your page's facebook ID
                     message_text = messaging_event["message"]["text"]  # the message's text
 
-                    send_message(sender_id, "Now watching: " + message_text)
-                    # if check_link(message_text):
-                    #     run(sender_id, message_text)
+                    if message_text == "RESET":
+                        send_message(sender_id, "OK, will reset")
+                        kill = sender_id
+
+                    elif check_link(message_text):
+                        send_message(sender_id, "Now watching: " + message_text)
+                        kill = ""
+                        run(sender_id, message_text)
 
                 if messaging_event.get("delivery"):  # delivery confirmation
                     pass
@@ -110,7 +117,7 @@ class MyClass:
 
         self.options = webdriver.ChromeOptions()
         self.options.add_argument('headless')
-        self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
+        # self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
         self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
 
     def get_listings(self):
@@ -131,22 +138,23 @@ class MyClass:
         if diff and self.first_time is not True:
             print("New Items!!")
             for item in diff:
-                print(item)
-                # send_message(id, item)
+                print("https://www.grailed.com" + item)
+                # send_message(id, "https://www.grailed.com" + item)
         else:
             self.first_time = False
         self.old_items = current_items
 
     def start(self):
-        while True:
+        while kill != self.sender_id:
             self.get_listings()
             time.sleep(1)  # check for updates every second
+        print("Killing Thread" + self.sender_id)
+        exit()
 
 
 def run(id, url):
     print(Fore.GREEN + "Start" + Style.RESET_ALL)
-
-    url = "https://www.grailed.com/feed/rn0qT30h5A"
+    # url = "https://www.grailed.com/feed/rn0qT30h5A"
     x = MyClass(id, url)
     t = Thread(target=x.start, name=str(id) + url)
     t.start()
@@ -154,3 +162,5 @@ def run(id, url):
 
 def check_link(url):
     return True
+
+# run(5, "https://www.grailed.com/feed/rn0qT30h5A")
