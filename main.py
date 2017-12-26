@@ -54,7 +54,7 @@ def webhook():
                         print(len(threads))
                         for t in threads:
                             t.kill = sender_id
-                            
+                            print(t.kill)
 
                     elif check_link(message_text):
                         send_message(sender_id, "Now watching: " + message_text)
