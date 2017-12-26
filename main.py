@@ -111,10 +111,10 @@ def webhook():
                         # print(threads)
                         # print(len(threads))
                         #
-                        # for t in threads:
-                        #     if sender_id in t.name:
-                        #         print("trying to end", t.name)
-                        #         t.stop()
+                        for t in threads:
+                            if sender_id in t.name:
+                                print("trying to end", t.name)
+                                # t.stop()
 
                     elif check_link(message_text):
                         send_message(sender_id, "Now watching: " + message_text)
@@ -180,7 +180,7 @@ def run(id, url):
     global threads
     threads.append(t1)
 
-    # t1.start()
+    t1.start()
 
 
 def check_link(url):
