@@ -44,7 +44,7 @@ class CustomThread(threading.Thread):  #
 
         self.options = webdriver.ChromeOptions()
         self.options.add_argument('headless')
-        # self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
+        self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
         self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
 
     def get_listings(self):
