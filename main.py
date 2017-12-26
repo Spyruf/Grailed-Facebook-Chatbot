@@ -141,7 +141,7 @@ class MyClass:
             print("New Items!!")
             for item in diff:
                 print("https://www.grailed.com" + item)
-                send_message(id, "https://www.grailed.com" + item)
+                send_message(self.sender_id, "https://www.grailed.com" + item)
         else:
             self.first_time = False
         self.old_items = current_items
