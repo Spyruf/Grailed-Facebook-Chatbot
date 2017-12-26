@@ -13,7 +13,7 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
-threads = ["ignore"]
+threads = []
 
 
 class CustomThread(threading.Thread):
@@ -110,16 +110,17 @@ def webhook():
                         send_message(sender_id, "OK, will reset")
 
                         global threads
-                        # print(threads)
-                        # print(len(threads))
+                        print(threads)
+                        print(len(threads))
 
                         for t in threads:
                             print(t)
-                            print("thread name is", str(t.name))
-                            print("sender id is", sender_id)
-                            if sender_id in str(t.name):
-                                print("trying to end", str(t.name))
-                                t.stop()
+                            if t.name is not None:
+                                print("thread name is", str(t.name))
+                                print("sender id is", sender_id)
+                                if sender_id in str(t.name):
+                                    print("trying to end", str(t.name))
+                                    t.stop()
 
                     elif check_link(message_text):
                         send_message(sender_id, "Now watching: " + message_text)
