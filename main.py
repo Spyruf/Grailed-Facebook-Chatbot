@@ -174,7 +174,7 @@ def webhook():
                         run(sender_id, message_text)
                     else:
                         send_message(sender_id,
-                                     "Send a Grailed link to monitor\nIt should look like this grailed.com/feed/*\n\nSend RESET to stop monitoring all links")
+                                     "Send a Grailed link to monitor\nIt should look like this grailed.com/feed/1234abcd\n\nSend RESET to stop monitoring all links")
 
                 if messaging_event.get("delivery"):  # delivery confirmation
                     pass
