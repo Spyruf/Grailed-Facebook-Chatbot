@@ -141,11 +141,11 @@ def webhook():
                     message_text = messaging_event["message"]["text"]  # the message's text
 
                     # send_message(sender_id, "Message Recieved: " + message_text)
+                    global threads
 
                     if message_text.upper() == "STATUS":
                         send_message(sender_id, "Currently Monitoring:")
 
-                        global threads
                         for t in threads:
                             if t.name is not None:
                                 print("thread name is", str(t.name))
@@ -155,8 +155,6 @@ def webhook():
 
                     elif message_text.upper() == "RESET":
                         send_message(sender_id, "OK, stopping all monitors")
-
-                        global threads
 
                         print(threads)
 
