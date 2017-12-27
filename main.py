@@ -153,7 +153,7 @@ def webhook():
                                     send_message(sender_id,
                                                  str(t.name).replace(sender_id, ''))  # Removes sender ID and sends Link
 
-                    if message_text.upper() == "RESET":
+                    elif message_text.upper() == "RESET":
                         send_message(sender_id, "OK, stopping all monitors")
 
                         global threads
@@ -174,7 +174,9 @@ def webhook():
                         run(sender_id, message_text)
                     else:
                         send_message(sender_id,
-                                     "Send a Grailed link to monitor\nIt should look like this grailed.com/feed/1234abcd\n\nSend RESET to stop monitoring all links")
+                                     "Send a Grailed link to monitor\nIt should look like this grailed.com/feed/1234abc"
+                                     "\nSend STATUS to see what links are being monitored "
+                                     "\nSend RESET to stop monitoring all links")
 
                 if messaging_event.get("delivery"):  # delivery confirmation
                     pass
