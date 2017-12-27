@@ -146,12 +146,18 @@ def webhook():
                     if message_text.upper() == "STATUS":
                         send_message(sender_id, "Currently Monitoring:")
 
+                        ming = False
+
                         for t in threads:
                             if t.name is not None:
                                 print("thread name is", str(t.name))
                                 if sender_id in str(t.name):
+                                    ming = True
                                     send_message(sender_id,
                                                  str(t.name).replace(sender_id, ''))  # Removes sender ID and sends Link
+                        if ming is False:
+                            send_message(sender_id, "No Links")
+
 
                     elif message_text.upper() == "RESET":
                         send_message(sender_id, "OK, stopping all monitors")
@@ -172,8 +178,9 @@ def webhook():
                         run(sender_id, message_text)
                     else:
                         send_message(sender_id,
-                                     "Send a Grailed Feed link to monitor\nIt should look like this grailed.com/feed/1234abc\nSend STATUS to see what links are being monitored\nSend RESET to stop monitoring all links")
-
+                                     "Send a Grailed Feed link to monitor\nIt should look like this grailed.com/feed/1234abc")
+                        send_message(sender_id, "Send STATUS to see what links are being monitored")
+                        send_message(sender_id, "Send RESET to stop monitoring all links")
                 if messaging_event.get("delivery"):  # delivery confirmation
                     pass
 
