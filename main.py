@@ -104,7 +104,7 @@ def run(id, url):
 
 
 def check_link(url):
-    if "grailed.com/feed/" in url and not url.isspace():
+    if "grailed.com/feed/" in url and " " not in url:
         return True
     else:
         print(Fore.RED + "INVALID URL" + Style.RESET_ALL)
