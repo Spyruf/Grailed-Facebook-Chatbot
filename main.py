@@ -191,9 +191,9 @@ def webhook():
                                 sender_id, "Send STATUS to see what links are being monitored")
                             send_message(
                                 sender_id, "Send RESET to stop monitoring all links")
-                        except KeyError:
-                            send_message(
-                                sender_id, "Please send a valid message only")
+                    except KeyError:
+                        send_message(
+                            sender_id, "Please send a valid message only")
 
                 if messaging_event.get("delivery"):  # delivery confirmation
                     pass
