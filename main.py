@@ -39,7 +39,6 @@ class CustomThread(threading.Thread):  #
 
         self.name = str(id) + url
 
-        self.kill = "blob"
         self.running = True
 
         self.options = webdriver.ChromeOptions()
@@ -76,11 +75,11 @@ class CustomThread(threading.Thread):  #
 
         while self.running:
             self.get_listings()
-            # print("kill in class is", self.kill)
             # print("id in class is", self.sender_id)
             time.sleep(600)  # check for updates every x seconds
 
         print(Fore.RED + "Killing Thread" + self.sender_id)
+        self.driver.quit()
         exit()
 
     def stop(self):
