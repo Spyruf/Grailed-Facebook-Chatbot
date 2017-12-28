@@ -65,13 +65,19 @@ class CustomThread(threading.Thread):  #
         diff = current_items.difference(self.old_items)
         if diff and self.first_time is not True:
             print("New Items!")
-            send_message(self.sender_id, "New Items!")
+            if self.running:
+                send_message(self.sender_id, "New Items!")
+            else:
+                exit()
             for item in diff:
                 item_link = "https://www.grailed.com" + item
                 print(item_link)
                 brand, name, size, price = self.item_info(item_link)
                 message = brand + '\n' + name + '\n' + size + '\n' + price + '\n' + item_link
-                send_message(self.sender_id, message)
+                if self.running:
+                    send_message(self.sender_id, message)
+                else:
+                    exit()
         else:
             self.first_time = False
         self.old_items = current_items
@@ -96,7 +102,7 @@ class CustomThread(threading.Thread):  #
             # print("id in class is", self.sender_id)
             time.sleep(int(os.environ["CHECK_DELAY"]))  # check for updates every x seconds
 
-        print(Fore.RED + "Killing Thread" + self.sender_id)
+        print(Fore.RED + "Killing Thread + Killing Selenium Driver" + self.sender_id)
         self.driver.quit()
         exit()
 
