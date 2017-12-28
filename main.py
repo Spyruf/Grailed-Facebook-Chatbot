@@ -88,7 +88,6 @@ class CustomThread(threading.Thread):  #
         print(Fore.RED + "Set running to 'False' for: ", self.name)
 
 
-
 def run(id, url):
     print(Fore.GREEN + "Start" + Style.RESET_ALL)
     url = "https://www.grailed.com/feed/rn0qT30h5A"
@@ -141,54 +140,60 @@ def webhook():
 
                     # the facebook ID of the person sending you the message
                     sender_id = messaging_event["sender"]["id"]
-                    # recipient_id = messaging_event["recipient"][
-                    #     "id"]  # the recipient's ID, which should be your page's facebook ID
-                    # # the message's text
-                    # message_text = messaging_event["message"]["text"]
-                    #
-                    # # send_message(sender_id, "Message Recieved: " + message_text)
-                    # global threads
-                    #
-                    # if message_text.upper() == "STATUS":
-                    #     send_message(sender_id, "Currently Monitoring:")
-                    #
-                    #     ming = False
-                    #
-                    #     for t in threads:
-                    #         if t.name is not None:
-                    #             print("thread name is", str(t.name))
-                    #             if sender_id in str(t.name):
-                    #                 ming = True
-                    #                 send_message(sender_id,
-                    #                              str(t.name).replace(sender_id, ''))  # Removes sender ID and sends Link
-                    #     if ming is False:
-                    #         send_message(sender_id, "No Links")
-                    #
-                    # elif message_text.upper() == "RESET":
-                    #     send_message(sender_id, "OK, stopping all monitors. Please wait 60 seconds for status to update")
-                    #
-                    #     print(threads)
-                    #
-                    #     for t in threads:
-                    #         print(t)
-                    #         if t.name is not None:
-                    #             print("thread name is", str(t.name))
-                    #             print("sender id is", sender_id)
-                    #             if sender_id in str(t.name):
-                    #                 print("trying to end", str(t.name))
-                    #                 t.stop()
-                    #
-                    # elif check_link(message_text):
-                    #     send_message(
-                    #         sender_id, "Now watching: " + message_text)
-                    #     run(sender_id, message_text)
-                    # else:
-                    #     send_message(sender_id,
-                    #                  "Send a Grailed Feed link to monitor\nIt should look like this grailed.com/feed/1234abc")
-                    #     send_message(
-                    #         sender_id, "Send STATUS to see what links are being monitored")
-                    #     send_message(
-                    #         sender_id, "Send RESET to stop monitoring all links")
+                    recipient_id = messaging_event["recipient"][
+                        "id"]  # the recipient's ID, which should be your page's facebook ID
+
+                    try:
+                        # the message's text
+                        message_text = messaging_event["message"]["text"]
+
+                        # send_message(sender_id, "Message Recieved: " + message_text)
+                        global threads
+
+                        if message_text.upper() == "STATUS":
+                            send_message(sender_id, "Currently Monitoring:")
+
+                            ming = False
+
+                            for t in threads:
+                                if t.name is not None:
+                                    print("thread name is", str(t.name))
+                                    if sender_id in str(t.name):
+                                        ming = True
+                                        send_message(sender_id,
+                                                     str(t.name).replace(sender_id, ''))  # Removes sender ID and sends Link
+                            if ming is False:
+                                send_message(sender_id, "No Links")
+
+                        elif message_text.upper() == "RESET":
+                            send_message(
+                                sender_id, "OK, stopping all monitors. Please wait 60 seconds for status to update")
+
+                            print(threads)
+
+                            for t in threads:
+                                print(t)
+                                if t.name is not None:
+                                    print("thread name is", str(t.name))
+                                    print("sender id is", sender_id)
+                                    if sender_id in str(t.name):
+                                        print("trying to end", str(t.name))
+                                        t.stop()
+
+                        elif check_link(message_text):
+                            send_message(
+                                sender_id, "Now watching: " + message_text)
+                            run(sender_id, message_text)
+                        else:
+                            send_message(sender_id,
+                                         "Send a Grailed Feed link to monitor\nIt should look like this grailed.com/feed/1234abc")
+                            send_message(
+                                sender_id, "Send STATUS to see what links are being monitored")
+                            send_message(
+                                sender_id, "Send RESET to stop monitoring all links")
+                        except KeyError:
+                            send_message(
+                                sender_id, "Please send a valid message only")
 
                 if messaging_event.get("delivery"):  # delivery confirmation
                     pass
