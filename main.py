@@ -78,7 +78,7 @@ class CustomThread(threading.Thread):  #
             self.get_listings()
             # print("kill in class is", self.kill)
             # print("id in class is", self.sender_id)
-            time.sleep(10)  # check for updates every x seconds
+            time.sleep(600)  # check for updates every x seconds
 
         print(Fore.RED + "Killing Thread" + self.sender_id)
         exit()
@@ -168,7 +168,7 @@ def webhook():
 
                         elif message_text.upper() == "RESET":
                             send_message(
-                                sender_id, "OK, stopping all monitors. Please wait 60 seconds for status to update")
+                                sender_id, "OK, stopping all monitors. Please wait 30 seconds for status to update")
 
                             print(threads)
 

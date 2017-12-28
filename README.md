@@ -8,7 +8,7 @@ Facebook Page Link: https://www.facebook.com/Grailed-Feed-Notifications-54258725
 ### Supported Inputs
 #### 1. Grailed Feed Links
   - e.g  https://www.grailed.com/feed/1234abc
-  - Starts a monitor to send a check for updates every 30 seconds
+  - Starts a monitor to send a check for updates every 600 seconds
 
 #### 2. Status
   - Shows all current links being monitored
