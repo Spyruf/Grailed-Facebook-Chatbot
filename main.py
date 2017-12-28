@@ -78,7 +78,7 @@ class CustomThread(threading.Thread):  #
             self.get_listings()
             # print("kill in class is", self.kill)
             # print("id in class is", self.sender_id)
-            time.sleep(30)  # check for updates every x seconds
+            time.sleep(10)  # check for updates every x seconds
 
         print(Fore.RED + "Killing Thread" + self.sender_id)
         exit()
@@ -105,7 +105,7 @@ def run(id, url):
 
 
 def check_link(url):
-    if "grailed.com/feed" in url:
+    if "grailed.com/feed/" in url:
         return True
     else:
         print(Fore.RED + "INVALID URL" + Style.RESET_ALL)
@@ -149,6 +149,7 @@ def webhook():
 
                         # send_message(sender_id, "Message Recieved: " + message_text)
                         global threads
+                        watch_bool = check_link(message_text)
 
                         if message_text.upper() == "STATUS":
                             send_message(sender_id, "Currently Monitoring:")
@@ -161,7 +162,8 @@ def webhook():
                                     if sender_id in str(t.name):
                                         ming = True
                                         send_message(sender_id,
-                                                     str(t.name).replace(sender_id, ''))  # Removes sender ID and sends Link
+                                                     str(t.name).replace(sender_id,
+                                                                         ''))  # Removes sender ID and sends Link
                             if ming is False:
                                 send_message(sender_id, "No Links")
 
@@ -180,10 +182,20 @@ def webhook():
                                         print("trying to end", str(t.name))
                                         t.stop()
 
-                        elif check_link(message_text):
-                            send_message(
-                                sender_id, "Now watching: " + message_text)
-                            run(sender_id, message_text)
+                        elif watch_bool is True:
+
+                            to_send = True
+                            for t in threads:
+                                if t.name is not None:
+                                    if sender_id in str(t.name):
+                                        to_send = False
+                            if to_send is True:
+                                send_message(
+                                    sender_id, "Now watching: " + message_text)
+                                run(sender_id, message_text)
+                            else:
+                                send_message(
+                                    sender_id, "Already Watching: " + message_text)
                         else:
                             send_message(sender_id,
                                          "Send a Grailed Feed link to monitor\nIt should look like this grailed.com/feed/1234abc")
