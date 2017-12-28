@@ -65,11 +65,27 @@ class CustomThread(threading.Thread):  #
         if diff and self.first_time is not True:
             print("New Items!!")
             for item in diff:
-                print("https://www.grailed.com" + item)
-                send_message(self.sender_id, "https://www.grailed.com" + item)
+                item_link = "https://www.grailed.com" + item
+                print(item_link)
+                brand, name, size, price = self.item_info(item_link)
+                message = brand + '\n' + name + '\n' + size + '\n' + price + '\n' + item_link
+                send_message(self.sender_id, message)
         else:
             self.first_time = False
         self.old_items = current_items
+
+    def item_info(self, item_link):
+
+        self.driver.get(item_link)
+        html = self.driver.page_source
+        soup = bs(html, "html.parser")
+
+        brand = soup.find(class_="designer").text.replace('\n', '')
+        name = soup.find(class_="listing-title").text.replace('\n', '')
+        size = soup.find(class_="listing-size").text.replace('\n', '')
+        price = soup.find(class_="price").text.replace('\n', '')
+
+        return brand, name, size, price
 
     def run(self):
 
