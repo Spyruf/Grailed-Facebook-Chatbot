@@ -15,3 +15,13 @@ Facebook Page Link: https://www.facebook.com/Grailed-Feed-Notifications-54258725
 
 #### 3. Reset
   - Stops monitoring any links for the current user
+
+
+
+
+### Terms of Service:
+Using this app means that messages sent to the Grailed-Feed-Notifications Messenger Bot will be processed in order to check for updates
+### Privacy Policy:
+Data is only used for this apps purpose which is to check for new Grailed listings and response with a message notifying you
+
+For support contact me at rb2eu@virginia.edu

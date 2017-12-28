@@ -121,7 +121,7 @@ def verify():
             return "Verification token mismatch", 403
         return request.args["hub.challenge"], 200
 
-    return "Hello world", 200
+    return "Terms of Service: Using this app means that messages sent to the Grailed-Feed-Notifications Messenger Bot will be processed in order to check for updates\nPrivacy Policy: Data is only used for this apps purpose which is to check for new Grailed listings and response with a message notifying you\nFor support contact me at rb2eu@virginia.edu", 200
 
 
 @app.route('/', methods=['POST'])
