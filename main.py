@@ -18,6 +18,7 @@ app = Flask(__name__)
 # os.environ[
 #     "PAGE_ACCESS_TOKEN"] = ""
 # os.environ["VERIFY_TOKEN"] = ""
+# os.environ["CHECK_DELAY"] = "10"
 
 print(Fore.CYAN, "CONFIG:")
 print(Fore.CYAN, "PAGE_ACCESS_TOKEN: " + os.environ["PAGE_ACCESS_TOKEN"])
@@ -92,7 +93,7 @@ class CustomThread(threading.Thread):  #
         while self.running:
             self.get_listings()
             # print("id in class is", self.sender_id)
-            time.sleep(600)  # check for updates every x seconds
+            time.sleep(int(os.environ["CHECK_DELAY"]))  # check for updates every x seconds
 
         print(Fore.RED + "Killing Thread" + self.sender_id)
         self.driver.quit()
