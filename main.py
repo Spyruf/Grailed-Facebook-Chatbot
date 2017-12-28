@@ -1,4 +1,5 @@
-import time, datetime
+import time
+import datetime
 import threading
 from selenium import webdriver
 from bs4 import BeautifulSoup as bs
@@ -44,7 +45,8 @@ class CustomThread(threading.Thread):  #
         self.options = webdriver.ChromeOptions()
         self.options.add_argument('headless')
         self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
-        self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
+        self.driver = webdriver.Chrome(
+            executable_path='chromedriver', chrome_options=self.options)
 
     def get_listings(self):
         print(Fore.YELLOW + "Checking" + Style.RESET_ALL)
@@ -135,10 +137,12 @@ def webhook():
 
                 if messaging_event.get("message"):  # someone sent us a message
 
-                    sender_id = messaging_event["sender"]["id"]  # the facebook ID of the person sending you the message
+                    # the facebook ID of the person sending you the message
+                    sender_id = messaging_event["sender"]["id"]
                     recipient_id = messaging_event["recipient"][
                         "id"]  # the recipient's ID, which should be your page's facebook ID
-                    message_text = messaging_event["message"]["text"]  # the message's text
+                    # the message's text
+                    message_text = messaging_event["message"]["text"]
 
                     # send_message(sender_id, "Message Recieved: " + message_text)
                     global threads
@@ -158,7 +162,6 @@ def webhook():
                         if ming is False:
                             send_message(sender_id, "No Links")
 
-
                     elif message_text.upper() == "RESET":
                         send_message(sender_id, "OK, stopping all monitors")
 
@@ -174,27 +177,32 @@ def webhook():
                                     t.stop()
 
                     elif check_link(message_text):
-                        send_message(sender_id, "Now watching: " + message_text)
+                        send_message(
+                            sender_id, "Now watching: " + message_text)
                         run(sender_id, message_text)
                     else:
                         send_message(sender_id,
                                      "Send a Grailed Feed link to monitor\nIt should look like this grailed.com/feed/1234abc")
-                        send_message(sender_id, "Send STATUS to see what links are being monitored")
-                        send_message(sender_id, "Send RESET to stop monitoring all links")
+                        send_message(
+                            sender_id, "Send STATUS to see what links are being monitored")
+                        send_message(
+                            sender_id, "Send RESET to stop monitoring all links")
                 if messaging_event.get("delivery"):  # delivery confirmation
                     pass
 
                 if messaging_event.get("optin"):  # optin confirmation
                     pass
 
-                if messaging_event.get("postback"):  # user clicked/tapped "postback" button in earlier message
+                # user clicked/tapped "postback" button in earlier message
+                if messaging_event.get("postback"):
                     pass
 
     return "ok", 200
 
 
 def send_message(recipient_id, message_text):
-    log("sending message to {recipient}: {text}".format(recipient=recipient_id, text=message_text))
+    log("sending message to {recipient}: {text}".format(
+        recipient=recipient_id, text=message_text))
 
     params = {
         "access_token": os.environ["PAGE_ACCESS_TOKEN"]
@@ -210,7 +218,8 @@ def send_message(recipient_id, message_text):
             "text": message_text
         }
     })
-    r = requests.post("https://graph.facebook.com/v2.6/me/messages", params=params, headers=headers, data=data)
+    r = requests.post("https://graph.facebook.com/v2.6/me/messages",
+                      params=params, headers=headers, data=data)
     if r.status_code != 200:
         log(r.status_code)
         log(r.text)
