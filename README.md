@@ -2,7 +2,7 @@
 
 Facebook Chat Bot that monitors Graled.com Feed Links for new listings
 
-Facebook Page Link: https://www.facebook.com/Grailed-Feed-Notifcations-542587252773234/
+Facebook Page Link: https://www.facebook.com/Grailed-Feed-Notifications-542587252773234/
 
 
 ### Supported Inputs
