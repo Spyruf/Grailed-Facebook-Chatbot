@@ -172,6 +172,8 @@ def webhook():
 
                             print(threads)
 
+                            removing = set()
+
                             for t in threads:
                                 print(t)
                                 if t.name is not None:
@@ -181,7 +183,10 @@ def webhook():
                                         print("trying to end", str(t.name))
                                         t.stop()
 
-                                        threads.remove(t)
+                                        removing.add(t)
+
+                            for t in removing:
+                                threads.remove(t)
 
                         elif watch_bool is True:
 
