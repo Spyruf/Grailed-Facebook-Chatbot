@@ -16,8 +16,8 @@ app = Flask(__name__)
 
 # Config
 # os.environ[
-#     "PAGE_ACCESS_TOKEN"] = "EAAF5JrI1h00BALc1R1OrZC2NBSPS9UQtFbPkzHS9YXwZC9ZAizFA3s1luLH6EwqpwtTzFrGpMG4SpfqbZALGdUbVaqus8DKD9lt4WEhMTGPkb5Rjsc34xRsks05olIjTbSO0fZAQmwbyC6BajbrxsiAZA3HYZAqvTnlZChfNTMFLXT7gW9DAJmRd"
-# os.environ["VERIFY_TOKEN"] = "test_token"
+#     "PAGE_ACCESS_TOKEN"] = ""
+# os.environ["VERIFY_TOKEN"] = ""
 
 print(Fore.CYAN, "CONFIG:")
 print(Fore.CYAN, "PAGE_ACCESS_TOKEN: " + os.environ["PAGE_ACCESS_TOKEN"])
