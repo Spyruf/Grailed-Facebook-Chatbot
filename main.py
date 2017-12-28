@@ -182,12 +182,14 @@ def webhook():
                                         print("trying to end", str(t.name))
                                         t.stop()
 
+                                        threads.remove(t)
+
                         elif watch_bool is True:
 
                             to_send = True
                             for t in threads:
                                 if t.name is not None:
-                                    if sender_id in str(t.name):
+                                    if message_text in str(t.name):
                                         to_send = False
                             if to_send is True:
                                 send_message(
