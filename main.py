@@ -64,7 +64,8 @@ class CustomThread(threading.Thread):  #
 
         diff = current_items.difference(self.old_items)
         if diff and self.first_time is not True:
-            print("New Items!!")
+            print("New Items!")
+            send_message(self.sender_id, "New Items!")
             for item in diff:
                 item_link = "https://www.grailed.com" + item
                 print(item_link)
