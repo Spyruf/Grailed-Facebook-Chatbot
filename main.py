@@ -24,7 +24,7 @@ print(Fore.CYAN, "PAGE_ACCESS_TOKEN: " + os.environ["PAGE_ACCESS_TOKEN"])
 print(Fore.CYAN, "VERIFY_TOKEN: " + os.environ["VERIFY_TOKEN"])
 print(Style.RESET_ALL)
 
-threads = []
+threads = set()
 
 
 class CustomThread(threading.Thread):  #
@@ -90,12 +90,11 @@ class CustomThread(threading.Thread):  #
 
 def run(id, url):
     print(Fore.GREEN + "Start" + Style.RESET_ALL)
-    url = "https://www.grailed.com/feed/rn0qT30h5A"
     t1 = CustomThread(id, url)
 
     # t = Thread(target=x.start, name=str(id) + url)
     global threads
-    threads.append(t1)
+    threads.add(t1)
     for item in threads:
         print(item.name)
 
