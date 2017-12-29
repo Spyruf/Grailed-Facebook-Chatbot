@@ -143,7 +143,7 @@ def verify():
             return "Verification token mismatch", 403
         return request.args["hub.challenge"], 200
 
-    return "Terms of Service: Using this app means that messages sent to the Grailed-Feed-Notifications Messenger Bot will be processed in order to check for updates\nPrivacy Policy: Data is only used for this apps purpose which is to check for new Grailed listings and response with a message notifying you\nFor support contact me at rb2eu@virginia.edu", 200
+    return "Terms of Service: Using this app means that messages sent to the Grailed-Feed-Notifications Messenger Bot will be processed in order to check for updates<br>Privacy Policy: Data is only used for this apps purpose which is to check for new Grailed listings and response with a message notifying you<br>For support contact me at rb2eu@virginia.edu", 200
 
 
 @app.route('/', methods=['POST'])
@@ -169,10 +169,10 @@ def webhook():
                         # the message's text
                         message_text = messaging_event["message"]["text"]
 
-                        # send_message(sender_id, "Message Recieved: " + message_text)
                         global threads
                         watch_bool = check_link(message_text)
 
+                        # Get Status
                         if message_text.upper() == "STATUS":
                             send_message(sender_id, "Currently Monitoring:")
 
@@ -189,6 +189,7 @@ def webhook():
                             if ming is False:
                                 send_message(sender_id, "No Links")
 
+                        # Reset all links
                         elif message_text.upper() == "RESET":
                             send_message(
                                 sender_id, "OK, stopping all monitors. Please wait 30 seconds for status to update")
@@ -211,6 +212,7 @@ def webhook():
                             for t in removing:
                                 threads.remove(t)
 
+                        # New Watch Link
                         elif watch_bool is True:
 
                             to_send = True
@@ -225,6 +227,7 @@ def webhook():
                             else:
                                 send_message(
                                     sender_id, "Already Watching: " + message_text)
+                        # Help Message
                         else:
                             send_message(sender_id,
                                          "Send a Grailed Feed link to monitor\nIt should look like this grailed.com/feed/1234abc")
@@ -236,15 +239,15 @@ def webhook():
                         send_message(
                             sender_id, "Please send a valid message only")
 
-                if messaging_event.get("delivery"):  # delivery confirmation
-                    pass
-
-                if messaging_event.get("optin"):  # optin confirmation
-                    pass
-
-                # user clicked/tapped "postback" button in earlier message
-                if messaging_event.get("postback"):
-                    pass
+                # if messaging_event.get("delivery"):  # delivery confirmation
+                #     pass
+                #
+                # if messaging_event.get("optin"):  # optin confirmation
+                #     pass
+                #
+                # # user clicked/tapped "postback" button in earlier message
+                # if messaging_event.get("postback"):
+                #     pass
 
     return "ok", 200
 
@@ -253,12 +256,8 @@ def send_message(recipient_id, message_text):
     log("sending message to {recipient}: {text}".format(
         recipient=recipient_id, text=message_text))
 
-    params = {
-        "access_token": os.environ["PAGE_ACCESS_TOKEN"]
-    }
-    headers = {
-        "Content-Type": "application/json"
-    }
+    params = {"access_token": os.environ["PAGE_ACCESS_TOKEN"]}
+    headers = {"Content-Type": "application/json"}
     data = json.dumps({
         "recipient": {
             "id": recipient_id
@@ -267,8 +266,7 @@ def send_message(recipient_id, message_text):
             "text": message_text
         }
     })
-    r = requests.post("https://graph.facebook.com/v2.6/me/messages",
-                      params=params, headers=headers, data=data)
+    r = requests.post("https://graph.facebook.com/v2.6/me/messages", params=params, headers=headers, data=data)
     if r.status_code != 200:
         log(r.status_code)
         log(r.text)
@@ -288,5 +286,3 @@ def log(msg, *args, **kwargs):  # simple wrapper for logging to stdout on heroku
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-# run(5, "https://www.grailed.com/feed/rn0qT30h5A")
