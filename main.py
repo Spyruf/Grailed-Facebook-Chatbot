@@ -28,7 +28,7 @@ print(Fore.CYAN, "VERIFY_TOKEN: " + os.environ["VERIFY_TOKEN"])
 print(Style.RESET_ALL)
 
 threads = set()
-r = redis.from_url(os.environ.get("REDIS_URL"))
+r = redis.from_url(os.environ.get("REDIS_URL"), decode_responses=True)
 
 
 # Custom Thread Class
@@ -293,10 +293,7 @@ def log(msg, *args, **kwargs):  # simple wrapper for logging to stdout on heroku
     sys.stdout.flush()
 
 
-print("-----------------")
 restart_threads()
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-print("********")

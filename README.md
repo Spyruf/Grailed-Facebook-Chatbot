@@ -18,7 +18,7 @@ Facebook Page Link: https://www.facebook.com/Grailed-Feed-Notifications-54258725
 
 
 ### Example
-![alt-text](example.png)
+![alt-text]()
 
 
 
