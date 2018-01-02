@@ -286,6 +286,7 @@ def log(msg, *args, **kwargs):  # simple wrapper for logging to stdout on heroku
 
 def restart_threads():
     thread_names = r.smembers('threads')
+    print(Fore.YELLOW + "Redis threads are:", thread_names)
     for name in thread_names:
         id = name.split('|')[0]
         url = name.split('|')[1]
