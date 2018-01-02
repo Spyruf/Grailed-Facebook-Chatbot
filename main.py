@@ -1,13 +1,15 @@
 import time
 import datetime
 import threading
-from selenium import webdriver
-from bs4 import BeautifulSoup as bs
 from colorama import Fore, Back, Style
 
 import os
 import sys
 import json
+
+from selenium import webdriver
+from bs4 import BeautifulSoup as bs
+import redis
 
 import requests
 from flask import Flask, request
@@ -26,17 +28,19 @@ print(Fore.CYAN, "VERIFY_TOKEN: " + os.environ["VERIFY_TOKEN"])
 print(Style.RESET_ALL)
 
 threads = set()
+r = redis.from_url(os.environ.get("REDIS_URL"))
 
 
-class CustomThread(threading.Thread):  #
+# Custom Thread Class
+class Checker(threading.Thread):
 
     def __init__(self, id, url):
-        super(CustomThread, self).__init__()
+        super(Checker, self).__init__()
 
         self.sender_id = id
         self.url = url
-        self.first_time = True
-        self.old_items = set()
+        self.first_time = True  # Prevent initial links from being marked as new
+        self.old_items = set()  # TODO convert to redis
 
         self.name = str(id) + url
 
@@ -51,38 +55,32 @@ class CustomThread(threading.Thread):  #
     def get_listings(self):
         print(Fore.YELLOW + "Checking" + Style.RESET_ALL)
 
-        self.driver.get(self.url)
+        self.driver.get(self.url)  # open link in selenium
 
-        html = self.driver.page_source
-        soup = bs(html, "html.parser")
-        listings = soup.find_all("div", class_="feed-item")
+        html = self.driver.page_source  # get raw html
+        soup = bs(html, "html.parser")  # convert to soup
+        listings = soup.find_all("div", class_="feed-item")  # get listings from the soup
 
-        current_items = set()
+        current_items = set()  # TODO Convert to redis
         for item in listings:
             if item.a is not None:
                 current_items.add(item.a.get("href"))
 
         diff = current_items.difference(self.old_items)
         if diff and self.first_time is not True:
-            print("New Items!")
-            if self.running:
-                send_message(self.sender_id, "New Items!")
-            else:
-                exit()
-            for item in diff:
-                item_link = "https://www.grailed.com" + item
-                print(item_link)
-                brand, name, size, price = self.item_info(item_link)
-                message = brand + '\n' + name + '\n' + size + '\n' + price + '\n' + item_link
-                if self.running:
-                    send_message(self.sender_id, message)
-                else:
-                    exit()
+            self.send_links(diff)
         else:
             self.first_time = False
+
         self.old_items = current_items
 
-    def item_info(self, item_link):
+    def send_links(self, diff):
+        send_message(self.sender_id, "New Items!") if self.running else exit()
+        for item in diff:
+            item_link = "https://www.grailed.com" + item
+            send_message(self.sender_id, self.get_item_info(item_link)) if self.running else exit()
+
+    def get_item_info(self, item_link):
 
         self.driver.get(item_link)
         html = self.driver.page_source
@@ -93,16 +91,17 @@ class CustomThread(threading.Thread):  #
         size = soup.find(class_="listing-size").text.replace('\n', '')
         price = soup.find(class_="price").text.replace('\n', '')
 
-        return brand, name, size, price
+        message = brand + '\n' + name + '\n' + size + '\n' + price + '\n' + item_link
+
+        return message
 
     def run(self):
 
         while self.running:
             self.get_listings()
-            # print("id in class is", self.sender_id)
             time.sleep(int(os.environ["CHECK_DELAY"]))  # check for updates every x seconds
 
-        print(Fore.RED + "Killing Thread + Killing Selenium Driver" + self.sender_id)
+        print(Fore.RED + "Killing Thread and Selenium Driver" + self.sender_id)
         self.driver.quit()
         exit()
 
@@ -111,27 +110,78 @@ class CustomThread(threading.Thread):  #
         print(Fore.RED + "Set running to 'False' for: ", self.name)
 
 
-def run(id, url):
-    print(Fore.GREEN + "Start" + Style.RESET_ALL)
-    t1 = CustomThread(id, url)
+def new_checker(id, url):
+    print(Fore.GREEN + "Starting new checker" + Style.RESET_ALL)
+    thread = Checker(id, url)
 
-    # t = Thread(target=x.start, name=str(id) + url)
     global threads
-    threads.add(t1)
-    for item in threads:
-        print(item.name)
+    threads.add(thread)  # Add thread to global list of threadsv
 
-    t1.start()
-    # t1.run()
-    print(Fore.GREEN + "t1 is running" + Style.RESET_ALL)
+    thread.start()
 
 
+# Check if message sent is a valid link
 def check_link(url):
     if "grailed.com/feed/" in url and " " not in url:
         return True
     else:
         print(Fore.RED + "INVALID URL" + Style.RESET_ALL)
         return False
+
+
+def status(sender_id):
+    global threads
+    send_message(sender_id, "Currently Monitoring:")
+    ming = False
+    for t in threads:
+        if t.name is not None:
+            print("thread name is", str(t.name))
+            if sender_id in str(t.name):
+                ming = True
+                send_message(sender_id, str(t.name).replace(sender_id, ''))  # Removes sender ID and sends Link
+    if ming is False:
+        send_message(sender_id, "No Links")
+
+
+def reset(sender_id):
+    global threads
+    send_message(sender_id, "OK, stopping all monitors. Please wait 30 seconds for status to update")
+    removing = set()
+    for t in threads:
+        print(t)
+        if t.name is not None:
+            print("thread name is", str(t.name))
+            print("sender id is", sender_id)
+            if sender_id in str(t.name):
+                print("trying to end", str(t.name))
+                t.stop()
+
+                removing.add(t)
+
+    for t in removing:
+        threads.remove(t)
+
+
+def exists(sender_id, message_text):
+    global threads
+    to_send = True
+    for t in threads:
+        if t.name is not None:
+            if message_text in str(t.name):
+                to_send = False
+    if to_send is True:
+        send_message(
+            sender_id, "Now watching: " + message_text)
+        new_checker(sender_id, message_text)
+    else:
+        send_message(
+            sender_id, "Already Watching: " + message_text)
+
+
+def help_message(sender_id):
+    send_message(sender_id, "Send a Grailed Feed link to monitor\nIt should look like this grailed.com/feed/1234abc")
+    send_message(sender_id, "Send STATUS to see what links are being monitored")
+    send_message(sender_id, "Send RESET to stop monitoring all links")
 
 
 @app.route('/', methods=['GET'])
@@ -169,72 +219,21 @@ def webhook():
                         # the message's text
                         message_text = messaging_event["message"]["text"]
 
-                        global threads
-                        watch_bool = check_link(message_text)
-
                         # Get Status
                         if message_text.upper() == "STATUS":
-                            send_message(sender_id, "Currently Monitoring:")
+                            status(sender_id)
 
-                            ming = False
-
-                            for t in threads:
-                                if t.name is not None:
-                                    print("thread name is", str(t.name))
-                                    if sender_id in str(t.name):
-                                        ming = True
-                                        send_message(sender_id,
-                                                     str(t.name).replace(sender_id,
-                                                                         ''))  # Removes sender ID and sends Link
-                            if ming is False:
-                                send_message(sender_id, "No Links")
-
-                        # Reset all links
+                        # Stop all monitors
                         elif message_text.upper() == "RESET":
-                            send_message(
-                                sender_id, "OK, stopping all monitors. Please wait 30 seconds for status to update")
+                            reset(sender_id)
 
-                            print(threads)
+                        # Recieved New Link
+                        elif check_link(message_text) is True:
+                            exists(sender_id, message_text)
 
-                            removing = set()
-
-                            for t in threads:
-                                print(t)
-                                if t.name is not None:
-                                    print("thread name is", str(t.name))
-                                    print("sender id is", sender_id)
-                                    if sender_id in str(t.name):
-                                        print("trying to end", str(t.name))
-                                        t.stop()
-
-                                        removing.add(t)
-
-                            for t in removing:
-                                threads.remove(t)
-
-                        # New Watch Link
-                        elif watch_bool is True:
-
-                            to_send = True
-                            for t in threads:
-                                if t.name is not None:
-                                    if message_text in str(t.name):
-                                        to_send = False
-                            if to_send is True:
-                                send_message(
-                                    sender_id, "Now watching: " + message_text)
-                                run(sender_id, message_text)
-                            else:
-                                send_message(
-                                    sender_id, "Already Watching: " + message_text)
                         # Help Message
                         else:
-                            send_message(sender_id,
-                                         "Send a Grailed Feed link to monitor\nIt should look like this grailed.com/feed/1234abc")
-                            send_message(
-                                sender_id, "Send STATUS to see what links are being monitored")
-                            send_message(
-                                sender_id, "Send RESET to stop monitoring all links")
+                            help_message(sender_id)
                     except KeyError:
                         send_message(
                             sender_id, "Please send a valid message only")
