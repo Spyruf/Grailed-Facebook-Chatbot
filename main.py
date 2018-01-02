@@ -122,6 +122,15 @@ def new_checker(id, url):
     thread.start()
 
 
+def restart_threads():
+    thread_names = r.smembers('threads')
+    print(Fore.YELLOW + "Redis threads are:", thread_names)
+    for name in thread_names:
+        id = name.split('|')[0]
+        url = name.split('|')[1]
+        new_checker(id, url)
+
+
 # Check if message sent is a valid link
 def check_link(url):
     if "grailed.com/feed/" in url and " " not in url:
@@ -284,15 +293,5 @@ def log(msg, *args, **kwargs):  # simple wrapper for logging to stdout on heroku
     sys.stdout.flush()
 
 
-def restart_threads():
-    thread_names = r.smembers('threads')
-    print(Fore.YELLOW + "Redis threads are:", thread_names)
-    for name in thread_names:
-        id = name.split('|')[0]
-        url = name.split('|')[1]
-        new_checker(id, url)
-
-
 if __name__ == '__main__':
-    restart_threads()
     app.run(debug=True)
