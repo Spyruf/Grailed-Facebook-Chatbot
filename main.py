@@ -42,7 +42,7 @@ class Checker(threading.Thread):
         self.first_time = True  # Prevent initial links from being marked as new
         self.old_items = set()  # TODO convert to redis
 
-        self.name = str(id) + url
+        self.name = str(id) + "|" + url
 
         self.running = True
 
@@ -111,11 +111,13 @@ class Checker(threading.Thread):
 
 
 def new_checker(id, url):
+    global threads
+
     print(Fore.GREEN + "Starting new checker" + Style.RESET_ALL)
     thread = Checker(id, url)
 
-    global threads
-    threads.add(thread)  # Add thread to global list of threadsv
+    threads.add(thread)  # Add thread to global list of threads
+    r.sadd('threads', str(id) + "|" + url)  # values in threads are the thread names
 
     thread.start()
 
@@ -138,7 +140,8 @@ def status(sender_id):
             print("thread name is", str(t.name))
             if sender_id in str(t.name):
                 ming = True
-                send_message(sender_id, str(t.name).replace(sender_id, ''))  # Removes sender ID and sends Link
+                send_message(sender_id, str(t.name).replace(sender_id, '').replace('|',
+                                                                                   ''))  # Removes sender ID and '|' and sends Link
     if ming is False:
         send_message(sender_id, "No Links")
 
@@ -148,18 +151,17 @@ def reset(sender_id):
     send_message(sender_id, "OK, stopping all monitors. Please wait 30 seconds for status to update")
     removing = set()
     for t in threads:
-        print(t)
-        if t.name is not None:
-            print("thread name is", str(t.name))
-            print("sender id is", sender_id)
-            if sender_id in str(t.name):
-                print("trying to end", str(t.name))
-                t.stop()
+        if t.name is not None and sender_id in str(t.name):
+            t.stop()
+            removing.add(t)
+            r.sadd("removing", str(t.name))
 
-                removing.add(t)
+    # Removes threads in redis by getting the difference of a main and temp set and then setting that to the main set
+    r.sdiffstore('threads', 'removing', 'threads')
 
     for t in removing:
         threads.remove(t)
+        r.srem('removing', str(t.name))
 
 
 def exists(sender_id, message_text):
@@ -235,8 +237,7 @@ def webhook():
                         else:
                             help_message(sender_id)
                     except KeyError:
-                        send_message(
-                            sender_id, "Please send a valid message only")
+                        send_message(sender_id, "Please send a valid message only")
 
                 # if messaging_event.get("delivery"):  # delivery confirmation
                 #     pass
@@ -283,5 +284,14 @@ def log(msg, *args, **kwargs):  # simple wrapper for logging to stdout on heroku
     sys.stdout.flush()
 
 
+def restart_threads():
+    thread_names = r.smembers('threads')
+    for name in thread_names:
+        id = name.split('|')[0]
+        url = name.split('|')[1]
+        new_checker(id, url)
+
+
 if __name__ == '__main__':
+    restart_threads()
     app.run(debug=True)
