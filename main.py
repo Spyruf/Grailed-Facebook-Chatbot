@@ -137,7 +137,7 @@ def status(sender_id):
     ming = False
     for t in threads:
         if t.name is not None:
-            print("thread name is", str(t.name))
+            # print("thread name is", str(t.name))
             if sender_id in str(t.name):
                 ming = True
                 send_message(sender_id, str(t.name).replace(sender_id, '').replace('|',
