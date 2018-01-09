@@ -16,11 +16,6 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
-# Config
-# os.environ[
-#     "PAGE_ACCESS_TOKEN"] = ""
-# os.environ["VERIFY_TOKEN"] = ""
-# os.environ["CHECK_DELAY"] = "10"
 
 print(Fore.CYAN, "CONFIG:")
 print(Fore.CYAN, "PAGE_ACCESS_TOKEN: " + os.environ["PAGE_ACCESS_TOKEN"])
