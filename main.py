@@ -298,7 +298,7 @@ print(Fore.CYAN + "PAGE_ACCESS_TOKEN: " + os.environ["PAGE_ACCESS_TOKEN"])
 print(Fore.CYAN + "VERIFY_TOKEN: " + os.environ["VERIFY_TOKEN"])
 print(Fore.CYAN + "CHECK_DELAY: " + os.environ["CHECK_DELAY"])
 print(Style.RESET_ALL)
-restart_threads()
+# restart_threads()
 
 if __name__ == '__main__':
     app.run(debug=True)
