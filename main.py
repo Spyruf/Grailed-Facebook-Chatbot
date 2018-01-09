@@ -50,7 +50,6 @@ class Checker(threading.Thread):
                 log("Couldn't start selenium, trying again")
                 time.sleep(10)
 
-
         self.driver.get(self.url)  # open link in selenium
         log(Fore.YELLOW + "Page Loaded" + Style.RESET_ALL)
 
@@ -128,7 +127,7 @@ def restart_threads():
         id = name.split('|')[0]
         url = name.split('|')[1]
         new_checker(id, url)
-        time.sleep(30)
+        # time.sleep(30)
 
 
 # Check if message sent is a valid link
