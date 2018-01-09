@@ -40,7 +40,7 @@ class Checker(threading.Thread):
         self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
 
     def get_listings(self):
-        log(Fore.YELLOW + "Checking" + Style.RESET_ALL)
+        log(Fore.YELLOW + "Started Checking" + Style.RESET_ALL)
         self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
 
         self.driver.get(self.url)  # open link in selenium
@@ -63,6 +63,8 @@ class Checker(threading.Thread):
         self.old_items = current_items
 
         self.driver.quit()
+        log(Fore.YELLOW + "Stopped Checking" + Style.RESET_ALL)
+
 
     def send_links(self, diff):
         send_message(self.sender_id, "New Items!") if self.running else exit()
