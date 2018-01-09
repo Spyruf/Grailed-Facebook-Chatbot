@@ -123,11 +123,18 @@ def new_checker(id, url):
 def restart_threads():
     thread_names = r.smembers('threads')
     log(Fore.YELLOW + "Redis threads are:" + ''.join(thread_names))
+    restart_threads_helper(thread_names)
+    log(Fore.YELLOW + "Exiting restart_threads" + ''.join(thread_names))
+
+
+def restart_threads_helper(thread_names):
+    log(Fore.YELLOW + "Starting restart_threads_helper" + ''.join(thread_names))
     for name in thread_names:
         id = name.split('|')[0]
         url = name.split('|')[1]
         new_checker(id, url)
-        # time.sleep(30)
+        time.sleep(30)
+    log(Fore.YELLOW + "Exiting restart_threads_helper" + ''.join(thread_names))
 
 
 # Check if message sent is a valid link
