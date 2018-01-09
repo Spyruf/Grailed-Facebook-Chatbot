@@ -38,11 +38,10 @@ class Checker(threading.Thread):
         self.options = webdriver.ChromeOptions()
         self.options.add_argument('headless')
         self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
-        self.driver = webdriver.Chrome(
-            executable_path='chromedriver', chrome_options=self.options)
 
     def get_listings(self):
         log(Fore.YELLOW + "Checking" + Style.RESET_ALL)
+        self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
 
         self.driver.get(self.url)  # open link in selenium
 
@@ -62,6 +61,8 @@ class Checker(threading.Thread):
             self.first_time = False
 
         self.old_items = current_items
+
+        self.driver.quit()
 
     def send_links(self, diff):
         send_message(self.sender_id, "New Items!") if self.running else exit()
@@ -91,7 +92,6 @@ class Checker(threading.Thread):
             time.sleep(int(os.environ["CHECK_DELAY"]))  # check for updates every x seconds
 
         log(Fore.RED + "Killing Thread and Selenium Driver" + self.sender_id)
-        self.driver.quit()
         exit()
 
     def stop(self):
