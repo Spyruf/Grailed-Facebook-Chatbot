@@ -45,10 +45,11 @@ class Checker(threading.Thread):
         while True:
             try:
                 self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
-                time.sleep(5)
                 break
             except:
                 log("Couldn't start selenium, trying again")
+                time.sleep(5)
+
 
         self.driver.get(self.url)  # open link in selenium
         log(Fore.YELLOW + "Page Loaded" + Style.RESET_ALL)
