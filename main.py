@@ -25,6 +25,7 @@ app = Flask(__name__)
 print(Fore.CYAN, "CONFIG:")
 print(Fore.CYAN, "PAGE_ACCESS_TOKEN: " + os.environ["PAGE_ACCESS_TOKEN"])
 print(Fore.CYAN, "VERIFY_TOKEN: " + os.environ["VERIFY_TOKEN"])
+print(Fore.CYAN, "CHECK_DELAY: " + os.environ["CHECK_DELAY"])
 print(Style.RESET_ALL)
 
 threads = set()
