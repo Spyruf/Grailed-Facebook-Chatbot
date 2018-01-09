@@ -17,6 +17,7 @@ from flask import Flask, request
 app = Flask(__name__)
 
 threads = set()
+started = False
 r = redis.from_url(os.environ.get("REDIS_URL"), decode_responses=True)
 
 
@@ -127,6 +128,15 @@ def restart_threads():
     log(Fore.YELLOW + "Exiting restart_threads" + ''.join(thread_names))
 
 
+def start_helper():
+    log(Fore.CYAN + "CONFIG:")
+    log(Fore.CYAN + "PAGE_ACCESS_TOKEN: " + os.environ["PAGE_ACCESS_TOKEN"])
+    log(Fore.CYAN + "VERIFY_TOKEN: " + os.environ["VERIFY_TOKEN"])
+    log(Fore.CYAN + "CHECK_DELAY: " + os.environ["CHECK_DELAY"])
+    log(Style.RESET_ALL)
+    restart_threads()
+
+
 def restart_threads_helper(thread_names):
     log(Fore.YELLOW + "Starting restart_threads_helper" + ''.join(thread_names))
     for name in thread_names:
@@ -209,6 +219,11 @@ def verify():
         if not request.args.get("hub.verify_token") == os.environ["VERIFY_TOKEN"]:
             return "Verification token mismatch", 403
         return request.args["hub.challenge"], 200
+    global started
+    if started is False:
+        log(Fore.LIGHTMAGENTA_EX + "Calling Start Helper")
+        start_helper()
+        started = True
 
     return "Terms of Service: Using this app means that messages sent to the Grailed-Feed-Notifications Messenger Bot will be processed in order to check for updates<br>Privacy Policy: Data is only used for this apps purpose which is to check for new Grailed listings and response with a message notifying you<br>For support contact me at <a href='mailto:rb2eu@virginia.edu'>rb2eu@virginia.edu</a>", 200
 
@@ -298,13 +313,6 @@ def log(msg, *args, **kwargs):  # simple wrapper for logging to stdout on heroku
         pass  # squash logging errors in case of non-ascii text
     sys.stdout.flush()
 
-
-print(Fore.CYAN + "CONFIG:")
-print(Fore.CYAN + "PAGE_ACCESS_TOKEN: " + os.environ["PAGE_ACCESS_TOKEN"])
-print(Fore.CYAN + "VERIFY_TOKEN: " + os.environ["VERIFY_TOKEN"])
-print(Fore.CYAN + "CHECK_DELAY: " + os.environ["CHECK_DELAY"])
-print(Style.RESET_ALL)
-restart_threads()
 
 if __name__ == '__main__':
     app.run(debug=True)
