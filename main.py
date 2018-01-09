@@ -282,12 +282,12 @@ def log(msg, *args, **kwargs):  # simple wrapper for logging to stdout on heroku
     sys.stdout.flush()
 
 
-restart_threads()
 
 if __name__ == '__main__':
     log(Fore.CYAN, "CONFIG:")
     log(Fore.CYAN, "PAGE_ACCESS_TOKEN: " + os.environ["PAGE_ACCESS_TOKEN"])
     log(Fore.CYAN, "VERIFY_TOKEN: " + os.environ["VERIFY_TOKEN"])
     log(Fore.CYAN, "CHECK_DELAY: " + os.environ["CHECK_DELAY"])
-    log(Style.RESET_ALL)
+    # log(Style.RESET_ALL)
+    restart_threads()
     app.run(debug=True)
