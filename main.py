@@ -45,6 +45,7 @@ class Checker(threading.Thread):
         while True:
             try:
                 self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
+                time.sleep(5)
                 break
             except:
                 log("Couldn't start selenium, trying again")
