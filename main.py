@@ -16,13 +16,6 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
-
-print(Fore.CYAN, "CONFIG:")
-print(Fore.CYAN, "PAGE_ACCESS_TOKEN: " + os.environ["PAGE_ACCESS_TOKEN"])
-print(Fore.CYAN, "VERIFY_TOKEN: " + os.environ["VERIFY_TOKEN"])
-print(Fore.CYAN, "CHECK_DELAY: " + os.environ["CHECK_DELAY"])
-print(Style.RESET_ALL)
-
 threads = set()
 r = redis.from_url(os.environ.get("REDIS_URL"), decode_responses=True)
 
@@ -49,7 +42,7 @@ class Checker(threading.Thread):
             executable_path='chromedriver', chrome_options=self.options)
 
     def get_listings(self):
-        print(Fore.YELLOW + "Checking" + Style.RESET_ALL)
+        log(Fore.YELLOW + "Checking" + Style.RESET_ALL)
 
         self.driver.get(self.url)  # open link in selenium
 
@@ -97,19 +90,19 @@ class Checker(threading.Thread):
             self.get_listings()
             time.sleep(int(os.environ["CHECK_DELAY"]))  # check for updates every x seconds
 
-        print(Fore.RED + "Killing Thread and Selenium Driver" + self.sender_id)
+        log(Fore.RED + "Killing Thread and Selenium Driver" + self.sender_id)
         self.driver.quit()
         exit()
 
     def stop(self):
         self.running = False
-        print(Fore.RED + "Set running to 'False' for: ", self.name)
+        log(Fore.RED + "Set running to 'False' for: ", self.name)
 
 
 def new_checker(id, url):
     global threads
 
-    print(Fore.GREEN + "Starting new checker" + Style.RESET_ALL)
+    log(Fore.GREEN + "Starting new checker" + Style.RESET_ALL)
     thread = Checker(id, url)
 
     threads.add(thread)  # Add thread to global list of threads
@@ -120,7 +113,7 @@ def new_checker(id, url):
 
 def restart_threads():
     thread_names = r.smembers('threads')
-    print(Fore.YELLOW + "Redis threads are:", thread_names)
+    log(Fore.YELLOW + "Redis threads are:" + ''.join(thread_names))
     for name in thread_names:
         id = name.split('|')[0]
         url = name.split('|')[1]
@@ -132,7 +125,7 @@ def check_link(url):
     if "grailed.com/feed/" in url and " " not in url:
         return True
     else:
-        print(Fore.RED + "INVALID URL" + Style.RESET_ALL)
+        log(Fore.RED + "INVALID URL" + Style.RESET_ALL)
         return False
 
 
@@ -142,7 +135,7 @@ def status(sender_id):
     ming = False
     for t in threads:
         if t.name is not None:
-            # print("thread name is", str(t.name))
+            # log("thread name is", str(t.name))
             if sender_id in str(t.name):
                 ming = True
                 send_message(sender_id, str(t.name).replace(sender_id, '').replace('|',
@@ -292,4 +285,9 @@ def log(msg, *args, **kwargs):  # simple wrapper for logging to stdout on heroku
 restart_threads()
 
 if __name__ == '__main__':
+    log(Fore.CYAN, "CONFIG:")
+    log(Fore.CYAN, "PAGE_ACCESS_TOKEN: " + os.environ["PAGE_ACCESS_TOKEN"])
+    log(Fore.CYAN, "VERIFY_TOKEN: " + os.environ["VERIFY_TOKEN"])
+    log(Fore.CYAN, "CHECK_DELAY: " + os.environ["CHECK_DELAY"])
+    log(Style.RESET_ALL)
     app.run(debug=True)
