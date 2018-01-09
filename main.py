@@ -38,6 +38,7 @@ class Checker(threading.Thread):
         self.options = webdriver.ChromeOptions()
         self.options.add_argument('headless')
         self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
+        self.driver = None
 
     def get_listings(self):
         log(Fore.YELLOW + "Started Checking" + Style.RESET_ALL)
@@ -64,7 +65,6 @@ class Checker(threading.Thread):
 
         self.driver.quit()
         log(Fore.YELLOW + "Stopped Checking" + Style.RESET_ALL)
-
 
     def send_links(self, diff):
         send_message(self.sender_id, "New Items!") if self.running else exit()
