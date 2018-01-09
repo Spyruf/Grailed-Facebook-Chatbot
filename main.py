@@ -96,7 +96,7 @@ class Checker(threading.Thread):
 
     def stop(self):
         self.running = False
-        log(Fore.RED + "Set running to 'False' for: ", self.name)
+        log(Fore.RED + "Set running to 'False' for: " + self.name)
 
 
 def new_checker(id, url):
@@ -280,7 +280,6 @@ def log(msg, *args, **kwargs):  # simple wrapper for logging to stdout on heroku
     except UnicodeEncodeError:
         pass  # squash logging errors in case of non-ascii text
     sys.stdout.flush()
-
 
 
 if __name__ == '__main__':
