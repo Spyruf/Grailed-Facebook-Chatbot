@@ -42,9 +42,15 @@ class Checker(threading.Thread):
 
     def get_listings(self):
         log(Fore.YELLOW + "Started Checking" + Style.RESET_ALL)
-        self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
+        while True:
+            try:
+                self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
+                break
+            except:
+                log("Couldn't start selenium, trying again")
 
         self.driver.get(self.url)  # open link in selenium
+        log(Fore.YELLOW + "Page Loaded" + Style.RESET_ALL)
 
         html = self.driver.page_source  # get raw html
         soup = bs(html, "html.parser")  # convert to soup
