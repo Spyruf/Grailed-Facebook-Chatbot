@@ -157,7 +157,6 @@ def check_link(url):
 
 
 def status(sender_id):
-    global tasks
     send_message(sender_id, "Currently Monitoring:")
     ming = False
     for t in tasks:
@@ -165,8 +164,9 @@ def status(sender_id):
             # log("tasks name is", str(t.name))
             if sender_id in str(t.name):
                 ming = True
-                send_message(sender_id, str(t.name).replace(sender_id, '').replace('|',
-                                                                                   ''))  # Removes sender ID and '|' and sends Link
+                # Removes sender ID and '|' and sends Link
+                send_message(sender_id, str(t.name).replace(sender_id, '').replace('|', ''))
+
     if ming is False:
         send_message(sender_id, "No Links")
 
@@ -190,12 +190,12 @@ def reset(sender_id):
 
 # This is where creating a new checker is decided
 def exists(sender_id, message_text):
-    global tasks
     to_send = True
     for t in tasks:
         if t.name is not None:
             if message_text in str(t.name):
                 to_send = False
+
     if to_send is True:
         send_message(
             sender_id, "Now watching: " + message_text)
