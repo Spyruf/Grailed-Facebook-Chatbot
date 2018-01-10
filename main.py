@@ -108,15 +108,20 @@ def run_queue():
             pass
         elif len(queue) is 0:  # if no remaining tasks exist
             log(Fore.MAGENTA + "Resetting the tasks")
+            log(Fore.RED + str(queue) + str(done))
             queue = done  # reset the tasks
             done.clear()
+            log(Fore.GREEN + str(queue) + str(done))
         else:
+            log(Fore.MAGENTA + "Queueing a task")
+            log(Fore.RED + str(queue) + str(done))
             qtask = queue.pop()
             if qtask in tasks:
                 qtask.get_listings()
                 done.add(qtask)
             else:
                 pass
+            log(Fore.GREEN + str(queue) + str(done))
 
 
 def add_to_queue(id, url):
