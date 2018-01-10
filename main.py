@@ -22,7 +22,6 @@ tasks = set()
 
 queue = set()
 done = set()
-done.
 
 
 # Object / Class for each separate link
