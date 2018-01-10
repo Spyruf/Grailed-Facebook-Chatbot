@@ -1,5 +1,4 @@
 .idea/
-.env
 local.py
 /venv
 Procfile.test
