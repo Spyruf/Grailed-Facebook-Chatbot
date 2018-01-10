@@ -24,7 +24,7 @@ queue = set()
 done = set()
 
 
-# Object / Class for each seperate link
+# Object / Class for each separate link
 class Checker:
 
     def __init__(self, id, url):
@@ -99,6 +99,10 @@ class Checker:
 
 
 def run_queue():
+    global tasks
+    global queue
+    global done
+
     while True:
         if len(tasks) is 0:  # if no tasks exist
             pass
