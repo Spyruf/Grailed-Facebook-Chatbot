@@ -79,7 +79,7 @@ class Checker:
 
     def send_links(self, diff):
         send_message(self.sender_id, "New Items!") if self.running else exit()
-        for item in diff:
+        for item in diff and self in tasks:
             item_link = "https://www.grailed.com" + item
             send_message(self.sender_id, self.get_item_info(item_link)) if self.running else exit()
 
@@ -107,7 +107,7 @@ def run_queue():
         if len(tasks) is 0:  # if no tasks exist
             pass
         elif len(queue) is 0:  # if no remaining tasks exist
-            log(Fore.MAGENTA+"Resetting the tasks")
+            log(Fore.MAGENTA + "Resetting the tasks")
             queue = done  # reset the tasks
             done.clear()
         else:
