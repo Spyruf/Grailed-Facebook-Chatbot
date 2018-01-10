@@ -107,6 +107,7 @@ def run_queue():
         if len(tasks) is 0:  # if no tasks exist
             pass
         elif len(queue) is 0:  # if no remaining tasks exist
+            log(Fore.MAGENTA+"Resetting the tasks")
             queue = done  # reset the tasks
             done.clear()
         else:
