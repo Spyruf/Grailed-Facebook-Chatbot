@@ -126,27 +126,6 @@ def add_to_queue(id, url):
     queue.add(task)
 
 
-@app.before_first_request
-def startup():
-    log(Fore.CYAN + "CONFIG:")
-    log(Fore.CYAN + "PAGE_ACCESS_TOKEN: " + os.environ["PAGE_ACCESS_TOKEN"])
-    log(Fore.CYAN + "VERIFY_TOKEN: " + os.environ["VERIFY_TOKEN"])
-    log(Fore.CYAN + "CHECK_DELAY: " + os.environ["CHECK_DELAY"])
-    log(Style.RESET_ALL)
-
-    # Add redis tasks to queue
-    task_names = r.smembers('tasks')
-    log(Fore.YELLOW + "Redis tasks are:" + ''.join(task_names))
-    for name in task_names:
-        id = name.split('|')[0]
-        url = name.split('|')[1]
-        add_to_queue(id, url)
-
-    # Start running the queue in a thread !!!
-    run_queue()  # TODO make it run as a seperate thread
-    log(Fore.MAGENTA + "Startup Complete")
-
-
 # Check if message sent is a valid link
 def check_link(url):
     if "grailed.com/feed/" in url and " " not in url:
@@ -209,6 +188,27 @@ def help_message(sender_id):
     send_message(sender_id, "Send a Grailed Feed link to monitor\nIt should look like this grailed.com/feed/1234abc")
     send_message(sender_id, "Send STATUS to see what links are being monitored")
     send_message(sender_id, "Send RESET to stop monitoring all links")
+
+
+@app.before_first_request
+def startup():
+    log(Fore.CYAN + "CONFIG:")
+    log(Fore.CYAN + "PAGE_ACCESS_TOKEN: " + os.environ["PAGE_ACCESS_TOKEN"])
+    log(Fore.CYAN + "VERIFY_TOKEN: " + os.environ["VERIFY_TOKEN"])
+    log(Fore.CYAN + "CHECK_DELAY: " + os.environ["CHECK_DELAY"])
+    log(Style.RESET_ALL)
+
+    # Add redis tasks to queue
+    task_names = r.smembers('tasks')
+    log(Fore.MAGENTA + "Redis tasks are:" + ''.join(task_names))
+    for name in task_names:
+        id = name.split('|')[0]
+        url = name.split('|')[1]
+        add_to_queue(id, url)
+
+    # Start running the queue in a thread !!!
+    # run_queue()  # TODO make it run as a seperate thread
+    log(Fore.MAGENTA + "Startup Complete * Currently queue hasn't been started")
 
 
 @app.route('/', methods=['GET'])
