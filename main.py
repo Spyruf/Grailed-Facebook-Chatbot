@@ -1,6 +1,6 @@
 import time
 import datetime
-import threading
+from threading import Thread
 from colorama import Fore, Back, Style
 
 import os
@@ -207,8 +207,8 @@ def startup():
         add_to_queue(id, url)
 
     # Start running the queue in a thread !!!
-    # run_queue()  # TODO make it run as a seperate thread
-    log(Fore.MAGENTA + "Startup Complete * Currently queue hasn't been started")
+    Thread(target=run_queue).start()
+    log(Fore.MAGENTA + "Startup Complete")
 
 
 @app.route('/', methods=['GET'])
