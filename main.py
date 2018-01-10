@@ -16,21 +16,24 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
-threads = set()
-started = False
 r = redis.from_url(os.environ.get("REDIS_URL"), decode_responses=True)
 
+tasks = set()
 
-# Custom Thread Class
-class Checker(threading.Thread):
+queue = set()
+done = set()
+
+
+# Object / Class for each seperate link
+class Checker:
 
     def __init__(self, id, url):
-        super(Checker, self).__init__()
+        # super(Checker, self).__init__()
 
         self.sender_id = id
         self.url = url
         self.first_time = True  # Prevent initial links from being marked as new
-        self.old_items = set()  # TODO convert to redis
+        self.old_items = set()
 
         self.name = str(id) + "|" + url
 
@@ -48,7 +51,7 @@ class Checker(threading.Thread):
                 self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
                 break
             except:
-                log("Couldn't start selenium, trying again")
+                log("Couldn't start selenium, trying again after 10 seconds")
                 time.sleep(10)
 
         self.driver.get(self.url)  # open link in selenium
@@ -58,7 +61,7 @@ class Checker(threading.Thread):
         soup = bs(html, "html.parser")  # convert to soup
         listings = soup.find_all("div", class_="feed-item")  # get listings from the soup
 
-        current_items = set()  # TODO Convert to redis
+        current_items = set()
         for item in listings:
             if item.a is not None:
                 current_items.add(item.a.get("href"))
@@ -92,60 +95,56 @@ class Checker(threading.Thread):
         price = soup.find(class_="price").text.replace('\n', '')
 
         message = brand + '\n' + name + '\n' + size + '\n' + price + '\n' + item_link
-
         return message
 
-    def run(self):
 
-        while self.running:
-            self.get_listings()
-            time.sleep(int(os.environ["CHECK_DELAY"]))  # check for updates every x seconds
-
-        log(Fore.RED + "Killing Thread and Selenium Driver" + self.sender_id)
-        exit()
-
-    def stop(self):
-        self.running = False
-        log(Fore.RED + "Set running to 'False' for: " + self.name)
-
-
-def new_checker(id, url):
-    global threads
-
-    log(Fore.GREEN + "Starting new checker" + Style.RESET_ALL)
-    thread = Checker(id, url)
-
-    threads.add(thread)  # Add thread to global list of threads
-    r.sadd('threads', str(id) + "|" + url)  # values in threads are the thread names
-
-    thread.start()
+def run_queue():
+    while True:
+        if len(tasks) is 0:  # if no tasks exist
+            pass
+        elif len(queue) is 0:  # if no remaining tasks exist
+            queue = done  # reset the tasks
+            done.clear()
+        else:
+            qtask = queue.pop()
+            if qtask in tasks:
+                qtask.get_listings()
+                done.add(qtask)
+            else:
+                pass
 
 
-def restart_threads():
-    thread_names = r.smembers('threads')
-    log(Fore.YELLOW + "Redis threads are:" + ''.join(thread_names))
-    # restart_threads_helper(thread_names)
-    for name in thread_names:
-        id = name.split('|')[0]
-        url = name.split('|')[1]
-        new_checker(id, url)
-        time.sleep(30)
-    log(Fore.YELLOW + "Exiting restart_threads")
+def add_to_queue(id, url):
+    log(Fore.MAGENTA + "Adding new checker to queue" + Style.RESET_ALL)
+
+    # add to redis
+    r.sadd('tasks', str(id) + "|" + url)  # values in tasks are the Checker object names
+
+    # create task object, add to tasks, add to queue
+    task = Checker(id, url)
+    tasks.add(task)
+    queue.add(task)
 
 
-def start_helper():
+@app.before_first_request
+def startup():
     log(Fore.CYAN + "CONFIG:")
     log(Fore.CYAN + "PAGE_ACCESS_TOKEN: " + os.environ["PAGE_ACCESS_TOKEN"])
     log(Fore.CYAN + "VERIFY_TOKEN: " + os.environ["VERIFY_TOKEN"])
     log(Fore.CYAN + "CHECK_DELAY: " + os.environ["CHECK_DELAY"])
     log(Style.RESET_ALL)
-    restart_threads()
 
+    # Add redis tasks to queue
+    task_names = r.smembers('tasks')
+    log(Fore.YELLOW + "Redis tasks are:" + ''.join(task_names))
+    for name in task_names:
+        id = name.split('|')[0]
+        url = name.split('|')[1]
+        add_to_queue(id, url)
 
-def restart_threads_helper(thread_names):
-    log(Fore.LIGHTBLUE_EX + "Starting restart_threads_helper")
-
-    log(Fore.LIGHTBLUE_EX + "Exiting restart_threads_helper")
+    # Start running the queue in a thread !!!
+    run_queue()  # TODO make it run as a seperate thread
+    log(Fore.MAGENTA + "Startup Complete")
 
 
 # Check if message sent is a valid link
@@ -158,12 +157,12 @@ def check_link(url):
 
 
 def status(sender_id):
-    global threads
+    global tasks
     send_message(sender_id, "Currently Monitoring:")
     ming = False
-    for t in threads:
+    for t in tasks:
         if t.name is not None:
-            # log("thread name is", str(t.name))
+            # log("tasks name is", str(t.name))
             if sender_id in str(t.name):
                 ming = True
                 send_message(sender_id, str(t.name).replace(sender_id, '').replace('|',
@@ -173,34 +172,34 @@ def status(sender_id):
 
 
 def reset(sender_id):
-    global threads
     send_message(sender_id, "OK, stopping all monitors. Please wait 30 seconds for status to update")
     removing = set()
-    for t in threads:
-        if t.name is not None and sender_id in str(t.name):
-            t.stop()
-            removing.add(t)
-            r.sadd("removing", str(t.name))
+    for task in tasks:
+        if task.name is not None and sender_id in str(task.name):
+            # adds task to a temp remove set b/c can not modify set during traversal
+            removing.add(task)
+            r.sadd("removing", str(task.name))
 
-    # Removes threads in redis by getting the difference of a main and temp set and then setting that to the main set
-    r.sdiffstore('threads', 'removing', 'threads')
+    # Removes tasks in redis by getting the difference of a main and temp set and then setting that to the main set
+    r.sdiffstore('tasks', 'removing', 'tasks')
 
-    for t in removing:
-        threads.remove(t)
-        r.srem('removing', str(t.name))
+    for task in removing:
+        tasks.remove(task)
+        r.srem('removing', str(task.name))
 
 
+# This is where creating a new checker is decided
 def exists(sender_id, message_text):
-    global threads
+    global tasks
     to_send = True
-    for t in threads:
+    for t in tasks:
         if t.name is not None:
             if message_text in str(t.name):
                 to_send = False
     if to_send is True:
         send_message(
             sender_id, "Now watching: " + message_text)
-        new_checker(sender_id, message_text)
+        add_to_queue(sender_id, message_text)
     else:
         send_message(
             sender_id, "Already Watching: " + message_text)
@@ -220,11 +219,6 @@ def verify():
         if not request.args.get("hub.verify_token") == os.environ["VERIFY_TOKEN"]:
             return "Verification token mismatch", 403
         return request.args["hub.challenge"], 200
-    global started
-    if started is False:
-        log(Fore.LIGHTMAGENTA_EX + "Calling Start Helper")
-        start_helper()
-        started = True
 
     return "Terms of Service: Using this app means that messages sent to the Grailed-Feed-Notifications Messenger Bot will be processed in order to check for updates<br>Privacy Policy: Data is only used for this apps purpose which is to check for new Grailed listings and response with a message notifying you<br>For support contact me at <a href='mailto:rb2eu@virginia.edu'>rb2eu@virginia.edu</a>", 200
 
