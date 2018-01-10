@@ -22,6 +22,7 @@ tasks = set()
 
 queue = set()
 done = set()
+done.
 
 
 # Object / Class for each separate link
@@ -109,7 +110,8 @@ def run_queue():
         elif len(queue) is 0:  # if no remaining tasks exist
             log(Fore.MAGENTA + "Resetting the tasks")
             print(Fore.RED, queue, done)
-            queue = done  # reset the tasks
+            for task in done:
+                queue.add(task)
             done.clear()
             print(Fore.GREEN, queue, done)
         else:
