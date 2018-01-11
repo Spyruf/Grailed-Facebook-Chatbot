@@ -28,7 +28,6 @@ done = set()
 class Checker:
 
     def __init__(self, id, url):
-        # super(Checker, self).__init__()
 
         self.sender_id = id
         self.url = url
@@ -61,6 +60,17 @@ class Checker:
         soup = bs(html, "html.parser")  # convert to soup
         listings = soup.find_all("div", class_="feed-item")  # get listings from the soup
 
+        # Retry once if the page loads without any listings
+        if len(listings) == 0:
+            self.driver.get(self.url)  # open link in selenium
+            log(Fore.YELLOW + "Page Loaded Second Time, now waiting 10 seconds" + Style.RESET_ALL)
+            time.sleep(10)
+
+            html = self.driver.page_source  # get raw html
+            soup = bs(html, "html.parser")  # convert to soup
+            listings = soup.find_all("div", class_="feed-item")  # get listings from the soup
+
+        # Fill current items
         current_items = set()
         for item in listings:
             if item.a is not None:
