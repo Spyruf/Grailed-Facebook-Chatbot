@@ -1,7 +1,7 @@
 # Grailed-Push-Notifications
 
 
-### View website here: www.rahulbatra.me/grailed/website
+### View website here: https://rahulbatra.me/grailed/website/
 
 Facebook Chat Bot that monitors Graled.com Feed Links for new listings
 
