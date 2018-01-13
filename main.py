@@ -88,8 +88,8 @@ class Checker:
 
             self.driver.quit()
             log(Fore.YELLOW + "Stopped Checking" + Style.RESET_ALL)
-        except selenium.common.exceptions as ex:
-            log("Selenium Exception" + ex)
+        except selenium.common.exceptions.TimeoutException as ex:
+            log("Selenium Exception" + ex.msg)
 
     def send_links(self, diff):
         send_message(self.sender_id, "New Items!") if self.running else exit()
