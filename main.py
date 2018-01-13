@@ -8,6 +8,7 @@ import sys
 import json
 
 from selenium import webdriver
+import selenium.common.exceptions
 from bs4 import BeautifulSoup as bs
 import redis
 
@@ -45,47 +46,50 @@ class Checker:
 
     def get_listings(self):
         log(Fore.YELLOW + "Started Checking" + Style.RESET_ALL)
-        while True:
-            try:
-                self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
-                break
-            except:
-                log("Couldn't start selenium, trying again after 10 seconds")
-                time.sleep(10)
+        try:
+            while True:
+                try:
+                    self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
+                    break
+                except:
+                    log("Couldn't start selenium, trying again after 10 seconds")
+                    time.sleep(10)
 
-        self.driver.get(self.url)  # open link in selenium
-        log(Fore.YELLOW + "Page Loaded" + Style.RESET_ALL)
-
-        html = self.driver.page_source  # get raw html
-        soup = bs(html, "html.parser")  # convert to soup
-        listings = soup.find_all("div", class_="feed-item")  # get listings from the soup
-
-        # Retry once if the page loads without any listings
-        if len(listings) == 0:
             self.driver.get(self.url)  # open link in selenium
-            log(Fore.YELLOW + "Page Loaded Second Time, now waiting 10 seconds" + Style.RESET_ALL)
-            time.sleep(10)
+            log(Fore.YELLOW + "Page Loaded" + Style.RESET_ALL)
 
             html = self.driver.page_source  # get raw html
             soup = bs(html, "html.parser")  # convert to soup
             listings = soup.find_all("div", class_="feed-item")  # get listings from the soup
 
-        # Fill current items
-        current_items = set()
-        for item in listings:
-            if item.a is not None:
-                current_items.add(item.a.get("href"))
+            # Retry once if the page loads without any listings
+            if len(listings) == 0:
+                self.driver.get(self.url)  # open link in selenium
+                log(Fore.YELLOW + "Page Loaded Second Time, now waiting 10 seconds" + Style.RESET_ALL)
+                time.sleep(10)
 
-        diff = current_items.difference(self.old_items)
-        if diff and self.first_time is not True:
-            self.send_links(diff)
-        else:
-            self.first_time = False
+                html = self.driver.page_source  # get raw html
+                soup = bs(html, "html.parser")  # convert to soup
+                listings = soup.find_all("div", class_="feed-item")  # get listings from the soup
 
-        self.old_items = current_items
+            # Fill current items
+            current_items = set()
+            for item in listings:
+                if item.a is not None:
+                    current_items.add(item.a.get("href"))
 
-        self.driver.quit()
-        log(Fore.YELLOW + "Stopped Checking" + Style.RESET_ALL)
+            diff = current_items.difference(self.old_items)
+            if diff and self.first_time is not True:
+                self.send_links(diff)
+            else:
+                self.first_time = False
+
+            self.old_items = current_items
+
+            self.driver.quit()
+            log(Fore.YELLOW + "Stopped Checking" + Style.RESET_ALL)
+        except selenium.common.exceptions as ex:
+            log("Selenium Exception" + ex)
 
     def send_links(self, diff):
         send_message(self.sender_id, "New Items!") if self.running else exit()
