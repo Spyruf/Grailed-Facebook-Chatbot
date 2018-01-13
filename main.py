@@ -227,7 +227,7 @@ def startup():
 
     # Add redis tasks to queue
     task_names = r.smembers('tasks')
-    log(Fore.MAGENTA + "Redis tasks are:" + ''.join(task_names))
+    log(Fore.MAGENTA + "Redis tasks are:" + '\n'.join(task_names))
     for name in task_names:
         id = name.split('|')[0]
         url = name.split('|')[1]
