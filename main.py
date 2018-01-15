@@ -142,7 +142,7 @@ def run_queue():
 
 
 def add_to_queue(id, url):
-    log(Fore.MAGENTA + "Adding new checker to queue" + Style.RESET_ALL)
+    log(Fore.LIGHTCYAN_EX + "Adding new checker to queue" + Style.RESET_ALL)
 
     # add to redis
     r.sadd('tasks', str(id) + "|" + url)  # values in tasks are the Checker object names
@@ -168,7 +168,7 @@ def status(sender_id):
     ming = False
     for t in tasks:
         if t.name is not None:
-            log(Fore.MAGENTA + "tasks name is", str(t.name))
+            log(Fore.MAGENTA + "tasks name is" + str(t.name))
             if sender_id in str(t.name):
                 ming = True
                 # Removes sender ID and '|' and sends Link
@@ -228,8 +228,10 @@ def startup():
 
     # Add redis tasks to queue
     task_names = r.smembers('tasks')
-    log(Fore.MAGENTA + "Redis tasks are:" + '\n'.join(task_names))
+    log(Fore.MAGENTA + "Redis tasks are:")
     for name in task_names:
+        log(Fore.MAGENTA + name)
+
         id = name.split('|')[0]
         url = name.split('|')[1]
         add_to_queue(id, url)
