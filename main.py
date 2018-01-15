@@ -123,7 +123,7 @@ def run_queue():
         if len(tasks) is 0:  # if no tasks exist
             pass
         elif len(queue) is 0:  # if no remaining tasks exist
-            log(Fore.GREEN + "Resetting the tasks")
+            log(Fore.GREEN + "Resetting the tasks queue")
             # print(Fore.RED, queue, done)
             for task in done:
                 queue.add(task)
@@ -179,6 +179,7 @@ def status(sender_id):
 
 
 def reset(sender_id):
+    log(Fore.YELLOW + "Resetting tasks for sender_id: " + str(sender_id))
     send_message(sender_id, "OK, stopping all monitors. Please wait 30 seconds for status to update")
     removing = set()
     for task in tasks:
