@@ -1,11 +1,12 @@
 # Grailed-Push-Notifications
-
-
 ### View website here: https://rahulbatra.me/grailed/website/
 
-Facebook Chat Bot that monitors Graled.com Feed Links for new listings
+Facebook Chat Bot that monitors Graled.com Feed Links and sends notifications for new listings
 
 Facebook Page Link: https://www.facebook.com/Grailed-Feed-Notifications-542587252773234/
+
+![alt-text](example3.png)
+![alt-text](example2.png)
 
 
 ### Supported Inputs
@@ -20,8 +21,17 @@ Facebook Page Link: https://www.facebook.com/Grailed-Feed-Notifications-54258725
   - Stops monitoring any links for the current user
 
 
-### Example
+### Screenshots
+General
+
 ![alt-text](example.png)
+
+New Items Format
+
+![alt-text](website/img/new.png)
+
+
+
 
 
 
