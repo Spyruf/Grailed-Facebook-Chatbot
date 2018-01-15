@@ -45,7 +45,7 @@ class Checker:
         self.driver = None
 
     def get_listings(self):
-        log(Fore.YELLOW + "Started Checking" + Style.RESET_ALL)
+        # log(Fore.YELLOW + "Started Checking" + Style.RESET_ALL)
         try:
             while True:
                 try:
@@ -56,7 +56,7 @@ class Checker:
                     time.sleep(10)
 
             self.driver.get(self.url)  # open link in selenium
-            log(Fore.YELLOW + "Page Loaded" + Style.RESET_ALL)
+            # log(Fore.YELLOW + "Page Loaded" + Style.RESET_ALL)
 
             html = self.driver.page_source  # get raw html
             soup = bs(html, "html.parser")  # convert to soup
@@ -87,7 +87,7 @@ class Checker:
             self.old_items = current_items
 
             self.driver.quit()
-            log(Fore.YELLOW + "Stopped Checking" + Style.RESET_ALL)
+            # log(Fore.YELLOW + "Stopped Checking" + Style.RESET_ALL)
         except selenium.common.exceptions.TimeoutException as ex:
             log(Fore.RED + "Selenium Exception" + ex.msg)
             log(Fore.RED + "ID: " + str(self.sender_id))
@@ -130,7 +130,7 @@ def run_queue():
             done.clear()
             # print(Fore.RED, queue, done)
         else:
-            log(Fore.GREEN + "Queueing a task")
+            # log(Fore.GREEN + "Queueing a task")
             # print(Fore.RED, queue, done)
             qtask = queue.pop()
             if qtask in tasks:
@@ -164,10 +164,11 @@ def check_link(url):
 
 def status(sender_id):
     send_message(sender_id, "Currently Monitoring:")
+    log(Fore.MAGENTA + "All Tasks are:")
     ming = False
     for t in tasks:
         if t.name is not None:
-            # log("tasks name is", str(t.name))
+            log(Fore.MAGENTA + "tasks name is", str(t.name))
             if sender_id in str(t.name):
                 ming = True
                 # Removes sender ID and '|' and sends Link
