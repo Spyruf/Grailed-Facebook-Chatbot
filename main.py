@@ -168,7 +168,7 @@ def status(sender_id):
     ming = False
     for t in tasks:
         if t.name is not None:
-            log(Fore.MAGENTA + "tasks name is" + str(t.name))
+            log(Fore.MAGENTA + "task name is: " + str(t.name))
             if sender_id in str(t.name):
                 ming = True
                 # Removes sender ID and '|' and sends Link
@@ -188,7 +188,7 @@ def reset(sender_id):
             r.sadd("removing", str(task.name))
 
     # Removes tasks in redis by getting the difference of a main and temp set and then setting that to the main set
-    r.sdiffstore('tasks', 'removing', 'tasks')
+    r.sdiffstore('tasks', 'tasks', 'removing')
 
     for task in removing:
         tasks.remove(task)
