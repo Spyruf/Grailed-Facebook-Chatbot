@@ -111,6 +111,7 @@ class Checker:
         price = soup.find(class_="price").text.replace('\n', '')
 
         message = brand + '\n' + name + '\n' + size + '\n' + price + '\n' + item_link
+        log(Fore.YELLOW + "New Item: " + message)
         return message
 
 
