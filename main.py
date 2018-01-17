@@ -6,6 +6,7 @@ from colorama import Fore, Back, Style
 import os
 import sys
 import json
+import traceback
 
 from selenium import webdriver
 import selenium.common.exceptions
@@ -44,19 +45,31 @@ class Checker:
         self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
         self.driver = None
 
+    def start_selenium(self):
+        while True:
+            try:
+                self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
+                break
+            except Exception:
+                log(Fore.RED + "Couldn't start selenium, trying again after 10 seconds")
+                log(print(traceback.format_exc()))
+                time.sleep(10)
+
+    def load_url(self):
+        try:
+            self.driver.get(self.url)  # open link in selenium
+            log(Fore.YELLOW + "Page Loaded: " + self.sender_id + Style.RESET_ALL)
+        except selenium.common.exceptions.TimeoutException as ex:
+            log(Fore.RED + "Selenium Exception" + ex.msg)
+            log(Fore.RED + "ID: " + str(self.sender_id))
+            log(Fore.RED + "URL: " + self.url)
+
     def get_listings(self):
         # log(Fore.YELLOW + "Started Checking" + Style.RESET_ALL)
         try:
-            while True:
-                try:
-                    self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
-                    break
-                except:
-                    log("Couldn't start selenium, trying again after 10 seconds")
-                    time.sleep(10)
+            self.start_selenium()
 
-            self.driver.get(self.url)  # open link in selenium
-            log(Fore.YELLOW + "Page Loaded: " + self.sender_id + Style.RESET_ALL)
+            self.load_url()
 
             html = self.driver.page_source  # get raw html
             soup = bs(html, "html.parser")  # convert to soup
@@ -92,12 +105,18 @@ class Checker:
             log(Fore.RED + "Selenium Exception" + ex.msg)
             log(Fore.RED + "ID: " + str(self.sender_id))
             log(Fore.RED + "URL: " + self.url)
+            log(Fore.RED + "URL: " + self.url)
+        except Exception:
+            log(Fore.RED + "Other exception in get_listings()")
+            log(Fore.RED + "ID: " + str(self.sender_id))
+            log(Fore.RED + "URL: " + self.url)
+            log(Fore.RED + "URL: " + self.url)
 
     def send_links(self, diff):
-        send_message(self.sender_id, "New Items!") if self.running else exit()
+        send_message(self.sender_id, "New Items!")  # if self.running else exit()
         for item in diff:
             item_link = "https://www.grailed.com" + item
-            send_message(self.sender_id, self.get_item_info(item_link)) if self.running else exit()
+            send_message(self.sender_id, self.get_item_info(item_link))  # if self.running else exit()
 
     def get_item_info(self, item_link):
 
@@ -135,7 +154,11 @@ def run_queue():
             # print(Fore.RED, queue, done)
             qtask = queue.pop()
             if qtask in tasks:
-                qtask.get_listings()
+                try:
+                    qtask.get_listings()
+                except Exception:
+                    log("There was some error, will skip for now: " + qtask.name)
+                    log(traceback.format_exc())
                 done.add(qtask)
             else:
                 pass
