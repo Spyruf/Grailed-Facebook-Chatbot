@@ -56,7 +56,7 @@ class Checker:
                     time.sleep(10)
 
             self.driver.get(self.url)  # open link in selenium
-            # log(Fore.YELLOW + "Page Loaded" + Style.RESET_ALL)
+            log(Fore.YELLOW + "Page Loaded: " + self.sender_id + Style.RESET_ALL)
 
             html = self.driver.page_source  # get raw html
             soup = bs(html, "html.parser")  # convert to soup
