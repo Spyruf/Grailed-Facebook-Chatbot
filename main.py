@@ -58,7 +58,7 @@ class Checker:
     def load_url(self):
         try:
             self.driver.get(self.url)  # open link in selenium
-            log(Fore.YELLOW + "Page Loaded: " + self.sender_id + Style.RESET_ALL)
+            log(Fore.YELLOW + "Page Loaded: " + self.name + Style.RESET_ALL)
         except selenium.common.exceptions.TimeoutException as ex:
             log(Fore.RED + "Selenium Exception" + ex.msg)
             log(Fore.RED + "ID: " + str(self.sender_id))
