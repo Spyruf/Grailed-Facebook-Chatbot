@@ -60,7 +60,7 @@ class Checker:
             self.driver.get(self.url)  # open link in selenium
             log(Fore.YELLOW + "Page Loaded: " + self.name + Style.RESET_ALL)
         except selenium.common.exceptions.TimeoutException as ex:
-            log(Fore.RED + "Selenium Exception: " + ex.msg)
+            log(Fore.RED + "load_url Selenium Exception: " + ex.msg)
             log(Fore.RED + "ID: " + str(self.sender_id))
             log(Fore.RED + "URL: " + self.url)
 
@@ -77,7 +77,7 @@ class Checker:
 
             # Retry once if the page loads without any listings
             if len(listings) == 0:
-                self.driver.get(self.url)  # open link in selenium
+                self.load_url()
                 log(Fore.YELLOW + "Page Loaded Second Time, now waiting 10 seconds" + Style.RESET_ALL)
                 time.sleep(10)
 
@@ -106,8 +106,8 @@ class Checker:
             log(Fore.RED + "ID: " + str(self.sender_id))
             log(Fore.RED + "URL: " + self.url)
             log(Fore.RED + "URL: " + self.url)
-        except Exception:
-            log(Fore.RED + "Other exception in get_listings()")
+        except Exception as ex:
+            log(Fore.RED + "Other exception in get_listings(): " + ex)
             log(Fore.RED + "ID: " + str(self.sender_id))
             log(Fore.RED + "URL: " + self.url)
             log(Fore.RED + "URL: " + self.url)
@@ -333,8 +333,7 @@ def webhook():
 
 
 def send_message(recipient_id, message_text):
-    log("sending message to {recipient}: {text}".format(
-        recipient=recipient_id, text=message_text))
+    # log("sending message to {recipient}: {text}".format(recipient=recipient_id, text=message_text))
 
     params = {"access_token": os.environ["PAGE_ACCESS_TOKEN"]}
     headers = {"Content-Type": "application/json"}
