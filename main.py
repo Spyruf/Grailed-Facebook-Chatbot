@@ -63,6 +63,7 @@ class Checker:
             log(Fore.RED + "load_url Selenium Exception: " + ex.msg)
             log(Fore.RED + "ID: " + str(self.sender_id))
             log(Fore.RED + "URL: " + self.url)
+            self.driver.quit()
 
     def get_listings(self):
         # log(Fore.YELLOW + "Started Checking" + Style.RESET_ALL)
@@ -102,15 +103,15 @@ class Checker:
             self.driver.quit()
             # log(Fore.YELLOW + "Stopped Checking" + Style.RESET_ALL)
         except selenium.common.exceptions.TimeoutException as ex:
-            log(Fore.RED + "Selenium Exception" + ex.msg)
+            log(Fore.RED + "Selenium Exception: " + ex.msg)
             log(Fore.RED + "ID: " + str(self.sender_id))
             log(Fore.RED + "URL: " + self.url)
-            log(Fore.RED + "URL: " + self.url)
+            self.driver.quit()
         except Exception as ex:
             log(Fore.RED + "Other exception in get_listings(): " + ex)
             log(Fore.RED + "ID: " + str(self.sender_id))
             log(Fore.RED + "URL: " + self.url)
-            log(Fore.RED + "URL: " + self.url)
+            self.driver.quit()
 
     def send_links(self, diff):
         send_message(self.sender_id, "New Items!")  # if self.running else exit()
