@@ -108,7 +108,7 @@ class Checker:
             log(Fore.RED + "URL: " + self.url)
             self.driver.quit()
         except Exception as ex:
-            log(Fore.RED + "Other exception in get_listings(): " + ex)
+            log(Fore.RED + "Other exception in get_listings(): " + ex.msg)
             log(Fore.RED + "ID: " + str(self.sender_id))
             log(Fore.RED + "URL: " + self.url)
             self.driver.quit()
