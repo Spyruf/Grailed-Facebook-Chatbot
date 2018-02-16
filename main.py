@@ -64,27 +64,40 @@ class Checker:
             log(Fore.RED + "ID: " + str(self.sender_id))
             log(Fore.RED + "URL: " + self.url)
             self.driver.quit()
+        except Exception:
+            log(Fore.RED + "Some error in load_url")
+            log(print(traceback.format_exc()))
 
-    def get_listings(self):
-        # log(Fore.YELLOW + "Started Checking" + Style.RESET_ALL)
-        try:
-            self.start_selenium()
 
+def get_listings(self):
+    # log(Fore.YELLOW + "Started Checking" + Style.RESET_ALL)
+    empty = True
+    try:
+        self.start_selenium()
+
+        self.load_url()
+
+        html = self.driver.page_source  # get raw html
+        soup = bs(html, "html.parser")  # convert to soup
+        listings = soup.find_all("div", class_="feed-item")  # get listings from the soup
+
+        # Retry once if the page loads without any listings
+        if len(listings) == 0:
             self.load_url()
+            log(Fore.YELLOW + "Page Loaded Second Time, now waiting 10 seconds" + Style.RESET_ALL)
+            time.sleep(10)
 
             html = self.driver.page_source  # get raw html
             soup = bs(html, "html.parser")  # convert to soup
             listings = soup.find_all("div", class_="feed-item")  # get listings from the soup
 
-            # Retry once if the page loads without any listings
-            if len(listings) == 0:
-                self.load_url()
-                log(Fore.YELLOW + "Page Loaded Second Time, now waiting 10 seconds" + Style.RESET_ALL)
-                time.sleep(10)
+        if len(listings) == 0:
+            empty = False
+            log(Fore.RED + "No items for listing")
+            log(Fore.RED + "ID: " + str(self.sender_id))
+            log(Fore.RED + "URL: " + self.url)
 
-                html = self.driver.page_source  # get raw html
-                soup = bs(html, "html.parser")  # convert to soup
-                listings = soup.find_all("div", class_="feed-item")  # get listings from the soup
+        if empty:
 
             # Fill current items
             current_items = set()
@@ -102,43 +115,46 @@ class Checker:
 
             self.driver.quit()
             # log(Fore.YELLOW + "Stopped Checking" + Style.RESET_ALL)
-        except selenium.common.exceptions.TimeoutException as ex:
-            log(Fore.RED + "Selenium Exception: " + ex.msg)
-            log(Fore.RED + "ID: " + str(self.sender_id))
-            log(Fore.RED + "URL: " + self.url)
-            self.driver.quit()
-        except Exception as ex:
-            log(Fore.RED + "Other exception in get_listings(): ")
-            try:
-                log(Fore.RED + ex)
-                log(Fore.RED + ex.msg)
-            except:
-                log(Fore.RED + "Could not print error message")
 
-            log(Fore.RED + "ID: " + str(self.sender_id))
-            log(Fore.RED + "URL: " + self.url)
-            self.driver.quit()
 
-    def send_links(self, diff):
-        send_message(self.sender_id, "New Items!")  # if self.running else exit()
-        for item in diff:
-            item_link = "https://www.grailed.com" + item
-            send_message(self.sender_id, self.get_item_info(item_link))  # if self.running else exit()
+    except selenium.common.exceptions.TimeoutException as ex:
+        log(Fore.RED + "Selenium Exception: " + ex.msg)
+        log(Fore.RED + "ID: " + str(self.sender_id))
+        log(Fore.RED + "URL: " + self.url)
+        self.driver.quit()
+    except Exception as ex:
+        log(Fore.RED + "Other exception in get_listings(): ")
+        try:
+            log(Fore.RED + ex)
+            log(Fore.RED + ex.msg)
+        except:
+            log(Fore.RED + "Could not print error message")
 
-    def get_item_info(self, item_link):
+        log(Fore.RED + "ID: " + str(self.sender_id))
+        log(Fore.RED + "URL: " + self.url)
+        self.driver.quit()
 
-        self.driver.get(item_link)
-        html = self.driver.page_source
-        soup = bs(html, "html.parser")
 
-        brand = soup.find(class_="designer").text.replace('\n', '')
-        name = soup.find(class_="listing-title").text.replace('\n', '')
-        size = soup.find(class_="listing-size").text.replace('\n', '')
-        price = soup.find(class_="price").text.replace('\n', '')
+def send_links(self, diff):
+    send_message(self.sender_id, "New Items!")  # if self.running else exit()
+    for item in diff:
+        item_link = "https://www.grailed.com" + item
+        send_message(self.sender_id, self.get_item_info(item_link))  # if self.running else exit()
 
-        message = brand + '\n' + name + '\n' + size + '\n' + price + '\n' + item_link
-        log(Fore.YELLOW + "New Item: " + message)
-        return message
+
+def get_item_info(self, item_link):
+    self.driver.get(item_link)
+    html = self.driver.page_source
+    soup = bs(html, "html.parser")
+
+    brand = soup.find(class_="designer").text.replace('\n', '')
+    name = soup.find(class_="listing-title").text.replace('\n', '')
+    size = soup.find(class_="listing-size").text.replace('\n', '')
+    price = soup.find(class_="price").text.replace('\n', '')
+
+    message = brand + '\n' + name + '\n' + size + '\n' + price + '\n' + item_link
+    log(Fore.YELLOW + "New Item: " + message)
+    return message
 
 
 def run_queue():
