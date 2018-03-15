@@ -70,7 +70,6 @@ class Checker:
 
     def get_listings(self):
         # log(Fore.YELLOW + "Started Checking" + Style.RESET_ALL)
-        items_exist = True
         try:
             self.start_selenium()
 
@@ -78,25 +77,23 @@ class Checker:
 
             html = self.driver.page_source  # get raw html
             soup = bs(html, "html.parser")  # convert to soup
-            listings = soup.find_all("div", class_="feed-item")  # get listings from the soup
 
-            # Retry once if the page loads without any listings
-            if len(listings) == 0:
-                self.load_url()
-                log(Fore.YELLOW + "Page Loaded Second Time, now waiting 10 seconds" + Style.RESET_ALL)
-                time.sleep(10)
+            if "Currently no items fit this criteria." in html:
+                log(Fore.YELLOW + "no items fit this criteria." + Style.RESET_ALL)
+                self.old_items = set()
 
-                html = self.driver.page_source  # get raw html
-                soup = bs(html, "html.parser")  # convert to soup
+            else:
                 listings = soup.find_all("div", class_="feed-item")  # get listings from the soup
 
-            if len(listings) == 0:
-                items_exist = False
-                log(Fore.RED + "No items for listing")
-                log(Fore.RED + "ID: " + str(self.sender_id))
-                log(Fore.RED + "URL: " + self.url)
+                # Retry once if the page loads without any listings
+                if len(listings) == 0:
+                    self.load_url()
+                    log(Fore.YELLOW + "Listings didn't load, now waiting 10 seconds" + Style.RESET_ALL)
+                    time.sleep(10)
 
-            if items_exist:
+                    html = self.driver.page_source  # get raw html
+                    soup = bs(html, "html.parser")  # convert to soup
+                    listings = soup.find_all("div", class_="feed-item")  # get listings from the soup
 
                 # Fill current items
                 current_items = set()
