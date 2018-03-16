@@ -66,6 +66,8 @@ class Checker:
             self.driver.quit()
         except Exception:
             log(Fore.RED + "Some error in load_url")
+            log(Fore.RED + "ID: " + str(self.sender_id))
+            log(Fore.RED + "URL: " + self.url)
             log(print(traceback.format_exc()))
 
     def get_listings(self):
@@ -89,6 +91,8 @@ class Checker:
                 if len(listings) == 0:
                     self.load_url()
                     log(Fore.YELLOW + "Listings didn't load, now waiting 10 seconds" + Style.RESET_ALL)
+                    log(Fore.YELLOW + "ID: " + str(self.sender_id))
+                    log(Fore.YELLOW + "URL: " + self.url)
                     time.sleep(10)
 
                     html = self.driver.page_source  # get raw html
