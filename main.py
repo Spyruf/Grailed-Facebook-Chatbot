@@ -200,7 +200,7 @@ def add_to_queue(id, url):
 def check_link(url):
     if "grailed.com/feed/" in url and " " not in url:
         return True
-     if "grailed.com/shop/" in url and " " not in url:
+    if "grailed.com/shop/" in url and " " not in url:
         return True
     else:
         log(Fore.RED + "INVALID URL" + Style.RESET_ALL)
