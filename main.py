@@ -80,7 +80,7 @@ class Checker:
             html = self.driver.page_source  # get raw html
             soup = bs(html, "html.parser")  # convert to soup
 
-            if "Currently no items fit this criteria." in html:
+            if "Currently no items fit this criteria." in html or "The product can not be found." in html:
                 log(Fore.YELLOW + "no items fit this criteria." + Style.RESET_ALL)
                 self.old_items = set()
 
