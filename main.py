@@ -90,9 +90,9 @@ class CheckerGrailed:
                 # Retry once if the page loads without any listings
                 if len(listings) == 0:
                     self.load_url()
-                    log(Fore.YELLOW + "Listings didn't load, now waiting 10 seconds" + Style.RESET_ALL)
-                    log(Fore.YELLOW + "ID: " + str(self.sender_id))
-                    log(Fore.YELLOW + "URL: " + self.url)
+                    log(Fore.RED + "Listings didn't load, now waiting 10 seconds" + Style.RESET_ALL)
+                    log(Fore.RED + "ID: " + str(self.sender_id))
+                    log(Fore.RED + "URL: " + self.url)
                     time.sleep(10)
 
                     html = self.driver.page_source  # get raw html
@@ -216,9 +216,9 @@ class CheckerMercari:
                 # Retry once if the page loads without any listings
                 if len(listings) == 0:
                     self.load_url()
-                    log(Fore.YELLOW + "Listings didn't load, now waiting 10 seconds" + Style.RESET_ALL)
-                    log(Fore.YELLOW + "ID: " + str(self.sender_id))
-                    log(Fore.YELLOW + "URL: " + self.url)
+                    log(Fore.RED + "Listings didn't load, now waiting 10 seconds" + Style.RESET_ALL)
+                    log(Fore.RED + "ID: " + str(self.sender_id))
+                    log(Fore.RED + "URL: " + self.url)
                     time.sleep(10)
 
                     html = self.driver.page_source  # get raw html
