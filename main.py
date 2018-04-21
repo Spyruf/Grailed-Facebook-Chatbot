@@ -211,7 +211,7 @@ class CheckerMercari:
                 self.old_items = set()
 
             else:
-                listings = soup.find_all("div", class_="items-box")  # get listings from the soup
+                listings = soup.find_all("section", class_="items-box")  # get listings from the soup
 
                 # Retry once if the page loads without any listings
                 if len(listings) == 0:
@@ -223,7 +223,7 @@ class CheckerMercari:
 
                     html = self.driver.page_source  # get raw html
                     soup = bs(html, "html.parser")  # convert to soup
-                    listings = soup.find_all("div", class_="feed-item")  # get listings from the soup
+                    listings = soup.find_all("section", class_="items-box")  # get listings from the soup
 
                 # Fill current items
                 current_items = set()
