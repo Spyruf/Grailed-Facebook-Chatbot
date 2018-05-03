@@ -18,7 +18,7 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
-r = redis.from_url(os.environ.get("REDIS_URL"), decode_responses=True)
+redis_db = redis.from_url(os.environ.get("REDIS_URL"), decode_responses=True)
 local = os.environ.get("LOCAL")
 
 tasks = set()
@@ -319,7 +319,7 @@ def add_to_queue(id, url):
     log(Fore.LIGHTCYAN_EX + "Adding new checker to queue" + Style.RESET_ALL)
 
     # add to redis
-    r.sadd('tasks', str(id) + "|" + url)  # values in tasks are the Checker object names
+    redis_db.sadd('tasks', str(id) + "|" + url)  # values in tasks are the Checker object names
 
     # create task object, add to tasks, add to queue
     if "grailed" in url:
@@ -369,14 +369,14 @@ def reset(sender_id):
         if task.name is not None and sender_id in str(task.name):
             # adds task to a temp remove set b/c can not modify set during traversal
             removing.add(task)
-            r.sadd("removing", str(task.name))
+            redis_db.sadd("removing", str(task.name))
 
     # Removes tasks in redis by getting the difference of a main and temp set and then setting that to the main set
-    r.sdiffstore('tasks', 'tasks', 'removing')
+    redis_db.sdiffstore('tasks', 'tasks', 'removing')
 
     for task in removing:
         tasks.remove(task)
-        r.srem('removing', str(task.name))
+        redis_db.srem('removing', str(task.name))
 
 
 # This is where creating a new checker is decided
@@ -413,7 +413,7 @@ def startup():
     log(Style.RESET_ALL)
 
     # Add redis tasks to queue
-    task_names = r.smembers('tasks')
+    task_names = redis_db.smembers('tasks')
     log(Fore.MAGENTA + "Redis tasks are:")
     for name in task_names:
         log(Fore.MAGENTA + name)
@@ -510,7 +510,7 @@ def send_message(recipient_id, message_text):
             "text": message_text
         }
     })
-    r = requests.post("https://graph.facebook.com/v2.6/me/messages", params=params, headers=headers, data=data)
+    r = requests.post("https://graph.facebook.com/v2.11/me/messages", params=params, headers=headers, data=data)
     if r.status_code != 200:
         log(r.status_code)
         log(r.text)
