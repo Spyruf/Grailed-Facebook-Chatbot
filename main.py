@@ -19,7 +19,7 @@ from flask import Flask, request
 app = Flask(__name__)
 
 r = redis.from_url(os.environ.get("REDIS_URL"), decode_responses=True)
-local = os.environ.get("REDIS_URL")
+local = os.environ.get("LOCAL")
 
 tasks = set()
 
@@ -43,7 +43,7 @@ class CheckerGrailed:
 
         self.options = webdriver.ChromeOptions()
         self.options.add_argument('headless')
-        if local is 0:
+        if local == 0:
             self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
         self.driver = None
 
@@ -170,7 +170,7 @@ class CheckerMercari:
 
         self.options = webdriver.ChromeOptions()
         self.options.add_argument('headless')
-        if local is 0:
+        if local == 0:
             self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
         self.driver = None
 
