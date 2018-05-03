@@ -20,7 +20,6 @@ app = Flask(__name__)
 
 r = redis.from_url(os.environ.get("REDIS_URL"), decode_responses=True)
 local = os.environ.get("LOCAL")
-print("this is a test ", type(local))
 
 tasks = set()
 
