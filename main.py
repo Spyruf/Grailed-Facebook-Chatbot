@@ -43,7 +43,7 @@ class CheckerGrailed:
 
         self.options = webdriver.ChromeOptions()
         self.options.add_argument('headless')
-        if local == 0:
+        if local is 0:
             self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
         self.driver = None
 
@@ -170,7 +170,7 @@ class CheckerMercari:
 
         self.options = webdriver.ChromeOptions()
         self.options.add_argument('headless')
-        if local == 0:
+        if local is 0:
             self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
         self.driver = None
 
