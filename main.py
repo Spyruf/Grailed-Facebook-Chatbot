@@ -446,9 +446,9 @@ def webhook():
     # return "ok", 200
 
     data = request.get_json()
-    log(Fore.MAGENTA + "Received Message: ")
+    log(Fore.GREEN + "Received Message: ")
     # print(data)
-    # log(data)  # you may not want to log every incoming message in production, but it's good for testing
+    log(data)  # you may not want to log every incoming message in production, but it's good for testing
 
     if data["object"] == "page":
 
@@ -513,7 +513,7 @@ def send_message(recipient_id, message_text):
     r = requests.post("https://graph.facebook.com/v2.11/me/messages", params=params, headers=headers, data=data)
     if r.status_code != 200:
         log(r.status_code)
-        log(r.text)
+        # log(r.text) TODO
 
 
 def log(msg, *args, **kwargs):  # simple wrapper for logging to stdout on heroku
