@@ -19,6 +19,7 @@ from flask import Flask, request
 app = Flask(__name__)
 
 r = redis.from_url(os.environ.get("REDIS_URL"), decode_responses=True)
+local = os.environ.get("REDIS_URL")
 
 tasks = set()
 
@@ -42,7 +43,8 @@ class CheckerGrailed:
 
         self.options = webdriver.ChromeOptions()
         self.options.add_argument('headless')
-        self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
+        if local == 0:
+            self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
         self.driver = None
 
     def start_selenium(self):
@@ -168,7 +170,8 @@ class CheckerMercari:
 
         self.options = webdriver.ChromeOptions()
         self.options.add_argument('headless')
-        self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
+        if local == 0:
+            self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
         self.driver = None
 
     def start_selenium(self):
@@ -405,6 +408,8 @@ def startup():
     log(Fore.CYAN + "PAGE_ACCESS_TOKEN: " + os.environ["PAGE_ACCESS_TOKEN"])
     log(Fore.CYAN + "VERIFY_TOKEN: " + os.environ["VERIFY_TOKEN"])
     log(Fore.CYAN + "CHECK_DELAY: " + os.environ["CHECK_DELAY"])
+    log(Fore.CYAN + "LOCAL: " + os.environ["LOCAL"])
+
     log(Style.RESET_ALL)
 
     # Add redis tasks to queue
@@ -513,6 +518,7 @@ def log(msg, *args, **kwargs):  # simple wrapper for logging to stdout on heroku
             msg = json.dumps(msg)
         else:
             msg = str(msg).format(*args, **kwargs)
+            # msg = "test"
         print(u"{}: {}".format(datetime.datetime.now(), msg))
     except UnicodeEncodeError:
         pass  # squash logging errors in case of non-ascii text
