@@ -444,8 +444,8 @@ def webhook():
     # endpoint for processing incoming messaging events
 
     data = request.get_json()
-    print(data)
-    return
+    log(Fore.MAGENTA + "Received Message: " + data)
+    return "ok", 200
     # log(data)  # you may not want to log every incoming message in production, but it's good for testing
 
     if data["object"] == "page":
