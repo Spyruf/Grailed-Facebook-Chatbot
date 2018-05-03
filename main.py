@@ -443,13 +443,12 @@ def verify():
 def webhook():
     # endpoint for processing incoming messaging events
 
-    return "ok", 200
+    # return "ok", 200
 
     data = request.get_json()
     log(Fore.MAGENTA + "Received Message: ")
     # print(data)
     # log(data)  # you may not want to log every incoming message in production, but it's good for testing
-    # return "ok", 200
 
     if data["object"] == "page":
 
