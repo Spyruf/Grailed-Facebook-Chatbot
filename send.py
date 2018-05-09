@@ -46,7 +46,7 @@ def send_message(recipient_id, message_text):
     response = requests.request("POST", url, data=data, headers=headers, params=params)
 
     if response.status_code != 200:
-        log(Fore.GREEN + response.status_code + Fore.RESET)
+        log(Fore.GREEN + str(response.status_code) + Fore.RESET)
         print(Fore.GREEN + response.text + Fore.RESET)
 
 
@@ -77,8 +77,10 @@ def get_IDs():
 
     return id_set
 
-
 if __name__ == '__main__':
+
+    ids = get_IDs()
+    log(Fore.CYAN + "Total IDs: " + len(ids) + Fore.RESET)
 
     if input("Custom Message? Y/N: ") == "Y":
         message = input("What message would you like to send?\n")
@@ -99,7 +101,6 @@ if __name__ == '__main__':
     elif input("Confirm? Y/N: ") == "Y":
         log(Fore.CYAN + "Sending Mass Message" + Fore.RESET)
 
-        ids = get_IDs()
         for id in ids:
             log(Fore.MAGENTA + id + Fore.RESET)
             send_message(id, message)
