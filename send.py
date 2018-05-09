@@ -83,13 +83,23 @@ if __name__ == '__main__':
     if input("Custom Message? Y/N: ") == "Y":
         message = input("What message would you like to send?\n")
     else:
-        message = ""
+        l1 = "Grailed Feed Notifications is back up and running! "
+        l2 = "Sorry for any inconveniences during the last week, we are currently improving reliability and are planning to add new features soon! "
+        l3 = ""
+        message = l1 + l2 + l3
 
     print("The message is: ")
     print(message)
 
-    if input("Confirm? Y/N: ") == "Y":
+    if input("Test? Y/N: ") == "Y":
+        log(Fore.CYAN + "Sending Test Message" + Fore.RESET)
+        id = 2253201071372239
+        send_message(id, message)
+
+    elif input("Confirm? Y/N: ") == "Y":
+        log(Fore.CYAN + "Sending Mass Message" + Fore.RESET)
+
         ids = get_IDs()
         for id in ids:
-            # log(Fore.MAGENTA + id + Fore.RESET)
-
+            log(Fore.MAGENTA + id + Fore.RESET)
+            send_message(id, message)
