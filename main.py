@@ -318,6 +318,13 @@ def run_queue():
 def add_to_queue(id, url):
     log(Fore.LIGHTCYAN_EX + "Adding new checker to queue" + Style.RESET_ALL)
 
+    # https check
+
+    if "www." not in url:
+        url = "www." + url
+    if "https" not in url:
+        url = "https://" + url
+
     # add to redis
     redis_db.sadd('tasks', str(id) + "|" + url)  # values in tasks are the Checker object names
 
