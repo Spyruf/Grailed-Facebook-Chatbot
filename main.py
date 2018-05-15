@@ -538,11 +538,9 @@ def error(message, function_name, id, url):
 
 
 def send_message(recipient_id, message_text):
-
     if local == "1":
         log("Pretending to send message to {recipient}: {text}".format(recipient=recipient_id, text=message_text))
-        pass
-
+        return
 
     url = "https://graph.facebook.com/v2.6/me/messages"
 
