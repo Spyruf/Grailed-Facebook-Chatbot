@@ -36,9 +36,9 @@ class CheckerGrailed:
         self.sender_id = id
         self.url = url
         self.first_time = True  # Prevent initial links from being marked as new
-        self.old_items = set()  # TODO get from Redis and format
 
         self.name = str(id) + "|" + url
+        self.old_items = redis_db.smembers(self.name)
 
         self.running = True
 
@@ -118,19 +118,21 @@ class CheckerGrailed:
                     soup = bs(html, "html.parser")  # convert to soup
                     listings = soup.find_all("div", class_="feed-item")  # get listings from the soup
 
+                # TODO use redis sets
                 # Fill current items
                 current_items = set()
                 for item in listings:
                     if item.a is not None:
                         current_items.add(item.a.get("href"))
-
                 diff = current_items.difference(self.old_items)
                 if diff and self.first_time is not True:
                     self.send_links(diff)
                 else:
                     self.first_time = False
 
-                self.old_items = current_items # Store into Redis properly
+                redis_db.delete(self.name)  # remove all former old item
+                for cur in current_items:
+                    redis_db.sadd(self.name, cur)  # current items are new old items
 
             self.driver.quit()
             # log(Fore.YELLOW + "Stopped Checking" + Style.RESET_ALL)
@@ -144,24 +146,12 @@ class CheckerGrailed:
             )
             self.driver.quit()
         except Exception as ex:
-            log(Fore.RED + "Other exception in get_listings(): ")
-            try:
-                func = inspect.currentframe().f_back.f_code
-                if ex.msg:
-                    emes = ex.msg
-                else:
-                    emes = ex
-                error(
-                    emes,
-                    func.co_name,
-                    self.sender_id,
-                    self.url
-                )
-            except:
-                log(Fore.RED + "Could not print error message")
-
-            log(Fore.RED + "ID: " + str(self.sender_id))
-            log(Fore.RED + "URL: " + self.url)
+            error(
+                "Other exception in get_listings(): ",
+                func.co_name,
+                self.sender_id,
+                self.url
+            )
             self.driver.quit()
 
     def send_links(self, diff):
@@ -401,6 +391,7 @@ def status(sender_id):
         send_message(sender_id, "No Links")
 
 
+# TODO remove the old items as well
 def reset(sender_id):
     log(Fore.YELLOW + "Resetting tasks for sender_id: " + str(sender_id))
     send_message(sender_id, "OK, stopping all monitors. Please wait 30 seconds for status to update")
@@ -417,6 +408,7 @@ def reset(sender_id):
     for task in removing:
         tasks.remove(task)
         redis_db.srem('removing', str(task.name))
+        redis_db.delete(str(task.name))
 
 
 # This is where creating a new checker is decided
