@@ -36,7 +36,7 @@ class CheckerGrailed:
         self.sender_id = id
         self.url = url
         self.first_time = True  # Prevent initial links from being marked as new
-        self.old_items = set()
+        self.old_items = set()  # TODO get from Redis and format
 
         self.name = str(id) + "|" + url
 
@@ -130,7 +130,7 @@ class CheckerGrailed:
                 else:
                     self.first_time = False
 
-                self.old_items = current_items
+                self.old_items = current_items # Store into Redis properly
 
             self.driver.quit()
             # log(Fore.YELLOW + "Stopped Checking" + Style.RESET_ALL)
