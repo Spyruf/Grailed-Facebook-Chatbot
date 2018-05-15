@@ -7,6 +7,7 @@ import os
 import sys
 import json
 import traceback
+import inspect
 
 from selenium import webdriver
 import selenium.common.exceptions
@@ -53,8 +54,13 @@ class CheckerGrailed:
                 self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
                 break
             except Exception:
-                log(Fore.RED + "Couldn't start selenium, trying again after 10 seconds")
-                log(print(traceback.format_exc()))
+                func = inspect.currentframe().f_back.f_code
+                error(
+                    "Couldn't start selenium, trying again after 10 seconds",
+                    func.co_name,
+                    self.sender_id,
+                    self.url
+                )
                 time.sleep(10)
 
     def load_url(self):
@@ -62,15 +68,22 @@ class CheckerGrailed:
             self.driver.get(self.url)  # open link in selenium
             log(Fore.YELLOW + "Page Loaded: " + self.name + Style.RESET_ALL)
         except selenium.common.exceptions.TimeoutException as ex:
-            log(Fore.RED + "load_url Selenium Exception: " + ex.msg)
-            log(Fore.RED + "ID: " + str(self.sender_id))
-            log(Fore.RED + "URL: " + self.url)
+            func = inspect.currentframe().f_back.f_code
+            error(
+                "load_url Selenium Timeout Exception: " + ex.msg,
+                func.co_name,
+                self.sender_id,
+                self.url
+            )
             self.driver.quit()
         except Exception:
-            log(Fore.RED + "Some error in load_url")
-            log(Fore.RED + "ID: " + str(self.sender_id))
-            log(Fore.RED + "URL: " + self.url)
-            log(print(traceback.format_exc()))
+            func = inspect.currentframe().f_back.f_code
+            error(
+                "load_url Selenium Exception: ",
+                func.co_name,
+                self.sender_id,
+                self.url
+            )
 
     def get_listings(self):
         # log(Fore.YELLOW + "Started Checking" + Style.RESET_ALL)
@@ -92,9 +105,13 @@ class CheckerGrailed:
                 # Retry once if the page loads without any listings
                 if len(listings) == 0:
                     self.load_url()
-                    log(Fore.RED + "Listings didn't load, now waiting 10 seconds" + Style.RESET_ALL)
-                    log(Fore.RED + "ID: " + str(self.sender_id))
-                    log(Fore.RED + "URL: " + self.url)
+                    func = inspect.currentframe().f_back.f_code
+                    error(
+                        "Listings didn't load, now waiting 10 seconds",
+                        func.co_name,
+                        self.sender_id,
+                        self.url
+                    )
                     time.sleep(10)
 
                     html = self.driver.page_source  # get raw html
@@ -118,15 +135,28 @@ class CheckerGrailed:
             self.driver.quit()
             # log(Fore.YELLOW + "Stopped Checking" + Style.RESET_ALL)
         except selenium.common.exceptions.TimeoutException as ex:
-            log(Fore.RED + "Selenium Exception: " + ex.msg)
-            log(Fore.RED + "ID: " + str(self.sender_id))
-            log(Fore.RED + "URL: " + self.url)
+            func = inspect.currentframe().f_back.f_code
+            error(
+                "Selenium Exception: " + ex.msg,
+                func.co_name,
+                self.sender_id,
+                self.url
+            )
             self.driver.quit()
         except Exception as ex:
             log(Fore.RED + "Other exception in get_listings(): ")
             try:
-                log(Fore.RED + ex)
-                log(Fore.RED + ex.msg)
+                func = inspect.currentframe().f_back.f_code
+                if ex.msg:
+                    emes = ex.msg
+                else:
+                    emes = ex
+                error(
+                    emes,
+                    func.co_name,
+                    self.sender_id,
+                    self.url
+                )
             except:
                 log(Fore.RED + "Could not print error message")
 
@@ -255,10 +285,13 @@ class CheckerMercari:
                 log(Fore.RED + ex)
                 log(Fore.RED + ex.msg)
             except:
-                log(Fore.RED + "Could not print error message")
-
-            log(Fore.RED + "ID: " + str(self.sender_id))
-            log(Fore.RED + "URL: " + self.url)
+                func = inspect.currentframe().f_back.f_code
+                error(
+                    "Could not print error message",
+                    func.co_name,
+                    self.sender_id,
+                    self.url
+                )
             self.driver.quit()
 
     def send_links(self, diff):
@@ -502,6 +535,14 @@ def webhook():
                 #     pass
 
     return "ok", 200
+
+
+def error(message, function_name, id, url):
+    log(Fore.MAGENTA + function_name)
+    log(Fore.RED + message)
+    log(Fore.RED + "ID: " + str(id))
+    log(Fore.RED + "URL: " + url)
+    log(print(traceback.format_exc()))
 
 
 def send_message(recipient_id, message_text):
