@@ -548,7 +548,8 @@ def error(message, function_name, id, url):
 
 def send_message(recipient_id, message_text):
     if local == "1":
-        log("Pretending to send message to {recipient}: {text}".format(recipient=recipient_id, text=message_text))
+        log("Pretending to send message to {recipient}".format(recipient=recipient_id))
+        # log("Pretending to send message to {recipient}: {text}".format(recipient=recipient_id, text=message_text))
         return
 
     url = "https://graph.facebook.com/v2.6/me/messages"
@@ -591,7 +592,7 @@ def check_mem():
     while True:
         print("------------------------------------------------------------------------------------------------------")
         objgraph.show_most_common_types()
-        time.sleep(10)
+        time.sleep(5)
 
 
 if __name__ == '__main__':
