@@ -46,7 +46,8 @@ class CheckerGrailed:
         # NOT NEEDED ANYMORE due to using redis to store old items
 
         self.name = str(id) + "|" + url
-        self.old_items = redis_db.smembers(self.name)
+        self.old_items = None
+        # self.old_items = redis_db.smembers(self.name)
 
         self.running = True
 
@@ -127,6 +128,8 @@ class CheckerGrailed:
                     listings = soup.find_all("div", class_="feed-item")  # get listings from the soup
 
                 # Fill current items
+                self.old_items = redis_db.smembers(self.name)
+
                 current_items = set()
                 for item in listings:
                     if item.a is not None:
@@ -140,6 +143,8 @@ class CheckerGrailed:
                 redis_db.delete(self.name)  # remove all former old item
                 for cur in current_items:
                     redis_db.sadd(self.name, cur)  # current items are new old items
+
+                del self.old_items
 
             self.driver.quit()
             # log(Fore.YELLOW + "Stopped Checking" + Style.RESET_ALL)
