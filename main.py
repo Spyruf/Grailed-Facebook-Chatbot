@@ -339,7 +339,7 @@ def run_queue():
                 except Exception:
                     func = inspect.currentframe().f_back.f_code
                     error(
-                        "load_url Selenium Timeout Exception: " + ex.msg,
+                        "Some other error, skipping for now",
                         func.co_name,
                         qtask.sender_id,
                         qtask.url
