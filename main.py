@@ -27,6 +27,10 @@ tasks = set()
 queue = set()
 done = set()
 
+from pytz import timezone
+# define eastern timezone
+eastern = timezone('US/Eastern')
+datetime.datetime.now(eastern)
 
 # Object / Class for each separate link
 class CheckerGrailed:
