@@ -412,8 +412,9 @@ def reset(sender_id):
         tasks.remove(task)
         redis_db.srem('removing', str(task.name))
         redis_db.delete(str(task.name))
-        
+
     del removing
+
 
 # This is where creating a new checker is decided
 def exists(sender_id, message_text):
