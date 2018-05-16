@@ -1,5 +1,6 @@
 import time
 import datetime
+from pytz import timezone
 from threading import Thread
 from colorama import Fore, Back, Style
 
@@ -27,10 +28,10 @@ tasks = set()
 queue = set()
 done = set()
 
-from pytz import timezone
 # define eastern timezone
 eastern = timezone('US/Eastern')
 datetime.datetime.now(eastern)
+
 
 # Object / Class for each separate link
 class CheckerGrailed:
@@ -122,7 +123,6 @@ class CheckerGrailed:
                     soup = bs(html, "html.parser")  # convert to soup
                     listings = soup.find_all("div", class_="feed-item")  # get listings from the soup
 
-                # TODO use redis sets
                 # Fill current items
                 current_items = set()
                 for item in listings:
@@ -395,7 +395,6 @@ def status(sender_id):
         send_message(sender_id, "No Links")
 
 
-# TODO remove the old items as well
 def reset(sender_id):
     log(Fore.YELLOW + "Resetting tasks for sender_id: " + str(sender_id))
     send_message(sender_id, "OK, stopping all monitors. Please wait 30 seconds for status to update")
@@ -413,7 +412,8 @@ def reset(sender_id):
         tasks.remove(task)
         redis_db.srem('removing', str(task.name))
         redis_db.delete(str(task.name))
-
+        
+    del removing
 
 # This is where creating a new checker is decided
 def exists(sender_id, message_text):
