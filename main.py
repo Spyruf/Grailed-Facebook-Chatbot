@@ -178,7 +178,7 @@ class CheckerGrailed:
         price = soup.find(class_="price").text.replace('\n', '')
 
         message = brand + '\n' + name + '\n' + size + '\n' + price + '\n' + item_link
-        log(Fore.YELLOW + "New Item: " + name + item_link)
+        log(Fore.YELLOW + "ID: " + self.sender_id + " New Item: " + name + item_link)
         return message
 
 
