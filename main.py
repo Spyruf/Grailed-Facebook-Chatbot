@@ -456,7 +456,7 @@ def startup():
     log(Fore.CYAN + "LOCAL: " + os.environ["LOCAL"])
     log(Style.RESET_ALL)
 
-    Thread(target=check_mem).start()
+    # Thread(target=check_mem).start()
 
     # Add redis tasks to queue
     task_names = redis_db.smembers('tasks')
