@@ -15,6 +15,8 @@ import selenium.common.exceptions
 from bs4 import BeautifulSoup as bs
 import redis
 
+import objgraph
+
 import requests
 from flask import Flask, request
 
@@ -447,8 +449,9 @@ def startup():
     log(Fore.CYAN + "VERIFY_TOKEN: " + os.environ["VERIFY_TOKEN"])
     log(Fore.CYAN + "CHECK_DELAY: " + os.environ["CHECK_DELAY"])
     log(Fore.CYAN + "LOCAL: " + os.environ["LOCAL"])
-
     log(Style.RESET_ALL)
+
+    Thread(target=check_mem).start()
 
     # Add redis tasks to queue
     task_names = redis_db.smembers('tasks')
@@ -582,6 +585,13 @@ def log(msg, *args, **kwargs):  # simple wrapper for logging to stdout on heroku
     except UnicodeEncodeError:
         pass  # squash logging errors in case of non-ascii text
     sys.stdout.flush()
+
+
+def check_mem():
+    while True:
+        print("------------------------------------------------------------------------------------------------------")
+        objgraph.show_most_common_types()
+        time.sleep(10)
 
 
 if __name__ == '__main__':
