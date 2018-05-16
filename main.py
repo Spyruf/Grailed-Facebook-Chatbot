@@ -337,8 +337,13 @@ def run_queue():
                 try:
                     qtask.get_listings()
                 except Exception:
-                    log("There was some error, will skip for now: " + qtask.name)
-                    log(traceback.format_exc())
+                    func = inspect.currentframe().f_back.f_code
+                    error(
+                        "load_url Selenium Timeout Exception: " + ex.msg,
+                        func.co_name,
+                        qtask.sender_id,
+                        qtask.url
+                    )
                 done.add(qtask)
             else:
                 pass
