@@ -42,7 +42,7 @@ class CheckerGrailed:
 
         self.sender_id = id
         self.url = url
-        self.first_time = True  # Prevent initial links from being marked as new
+        self.first_time = False  # Prevent initial links from being marked as new
         # NOT NEEDED ANYMORE due to using redis to store old items
 
         self.name = str(id) + "|" + url
