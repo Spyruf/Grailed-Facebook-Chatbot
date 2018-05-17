@@ -63,10 +63,10 @@ class CheckerGrailed:
                 self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
                 break
             except Exception:
-                func = inspect.currentframe().f_back.f_code
+                # func = inspect.currentframe().f_back.f_code
                 error(
                     "Couldn't start selenium, trying again after 10 seconds",
-                    func.co_name,
+                    "start_selenium",  # func.co_name,
                     self.sender_id,
                     self.url
                 )
@@ -77,19 +77,19 @@ class CheckerGrailed:
             self.driver.get(self.url)  # open link in selenium
             log(Fore.YELLOW + "Page Loaded: " + self.name + Style.RESET_ALL)
         except selenium.common.exceptions.TimeoutException as ex:
-            func = inspect.currentframe().f_back.f_code
+            # func = inspect.currentframe().f_back.f_code
             error(
                 "load_url Selenium Timeout Exception: " + ex.msg,
-                func.co_name,
+                "load_url",  # func.co_name,
                 self.sender_id,
                 self.url
             )
             self.driver.quit()
         except Exception:
-            func = inspect.currentframe().f_back.f_code
+            # func = inspect.currentframe().f_back.f_code
             error(
                 "load_url Selenium Exception: ",
-                func.co_name,
+                "load_url",  # func.co_name,
                 self.sender_id,
                 self.url
             )
@@ -114,10 +114,10 @@ class CheckerGrailed:
                 # Retry once if the page loads without any listings
                 if len(listings) == 0:
                     self.load_url()
-                    func = inspect.currentframe().f_back.f_code
+                    # func = inspect.currentframe().f_back.f_code
                     error(
                         "Listings didn't load, now waiting 10 seconds",
-                        func.co_name,
+                        "get_listings",  # func.co_name,
                         self.sender_id,
                         self.url
                     )
@@ -149,10 +149,10 @@ class CheckerGrailed:
             self.driver.quit()
             # log(Fore.YELLOW + "Stopped Checking" + Style.RESET_ALL)
         except selenium.common.exceptions.TimeoutException as ex:
-            func = inspect.currentframe().f_back.f_code
+            # func = inspect.currentframe().f_back.f_code
             error(
                 "Selenium Exception: " + ex.msg,
-                func.co_name,
+                "get_listings",  # func.co_name,
                 self.sender_id,
                 self.url
             )
@@ -160,7 +160,7 @@ class CheckerGrailed:
         except Exception as ex:
             error(
                 "Other exception in get_listings(): ",
-                func.co_name,
+                "get_listings",  # func.co_name,
                 self.sender_id,
                 self.url
             )
@@ -287,10 +287,10 @@ class CheckerMercari:
                 log(Fore.RED + ex)
                 log(Fore.RED + ex.msg)
             except:
-                func = inspect.currentframe().f_back.f_code
+                # func = inspect.currentframe().f_back.f_code
                 error(
                     "Could not print error message",
-                    func.co_name,
+                    "get_listings",  # func.co_name,
                     self.sender_id,
                     self.url
                 )
@@ -342,10 +342,10 @@ def run_queue():
                 try:
                     qtask.get_listings()
                 except Exception:
-                    func = inspect.currentframe().f_back.f_code
+                    # func = inspect.currentframe().f_back.f_code
                     error(
                         "Some other error, skipping for now",
-                        func.co_name,
+                        "run_queue",  # func.co_name,
                         qtask.sender_id,
                         qtask.url
                     )
@@ -599,7 +599,6 @@ def log(msg, *args, **kwargs):  # simple wrapper for logging to stdout on heroku
 
 
 def memory_summary():
-
     while True:
         # Only import Pympler when we need it. We don't want it to
         # affect our process if we never call memory_summary.
