@@ -594,12 +594,15 @@ def log(msg, *args, **kwargs):  # simple wrapper for logging to stdout on heroku
 
 
 def memory_summary():
-    # Only import Pympler when we need it. We don't want it to
-    # affect our process if we never call memory_summary.
-    from pympler import summary, muppy
-    mem_summary = summary.summarize(muppy.get_objects())
-    rows = summary.format_(mem_summary)
-    print('\n'.join(rows))
+
+    while True:
+        # Only import Pympler when we need it. We don't want it to
+        # affect our process if we never call memory_summary.
+        from pympler import summary, muppy
+        mem_summary = summary.summarize(muppy.get_objects())
+        rows = summary.format_(mem_summary)
+        print('\n'.join(rows))
+        time.sleep(5)
 
 
 def check_mem():
