@@ -456,7 +456,7 @@ def startup():
     log(Fore.CYAN + "LOCAL: " + os.environ["LOCAL"])
     log(Style.RESET_ALL)
 
-    # Thread(target=check_mem).start()
+    Thread(target=memory_summary).start()
 
     # Add redis tasks to queue
     task_names = redis_db.smembers('tasks')
@@ -591,6 +591,15 @@ def log(msg, *args, **kwargs):  # simple wrapper for logging to stdout on heroku
     except UnicodeEncodeError:
         pass  # squash logging errors in case of non-ascii text
     sys.stdout.flush()
+
+
+def memory_summary():
+    # Only import Pympler when we need it. We don't want it to
+    # affect our process if we never call memory_summary.
+    from pympler import summary, muppy
+    mem_summary = summary.summarize(muppy.get_objects())
+    rows = summary.format_(mem_summary)
+    print('\n'.join(rows))
 
 
 def check_mem():
