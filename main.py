@@ -35,6 +35,8 @@ eastern = timezone('US/Eastern')
 datetime.datetime.now(eastern)
 
 
+# TODO stop creating threads for each one, maybe chrome driver isn't cleaning up properly
+# TODO check if multiple chrome drivers are being created via ps:exec and top to ssh into the actual server 
 # Object / Class for each separate link
 class CheckerGrailed:
 
@@ -295,6 +297,7 @@ class CheckerMercari:
                     self.url
                 )
             self.driver.quit()
+        self.driver.quit()
 
     def send_links(self, diff):
         send_message(self.sender_id, "New Items!")  # if self.running else exit()
