@@ -35,8 +35,9 @@ eastern = timezone('US/Eastern')
 datetime.datetime.now(eastern)
 
 
+# TODO close chromedriver when improperly terminated
 # TODO stop creating threads for each one, maybe chrome driver isn't cleaning up properly
-# TODO check if multiple chrome drivers are being created via ps:exec and top to ssh into the actual server 
+# TODO check if multiple chrome drivers are being created via ps:exec and top to ssh into the actual server
 # Object / Class for each separate link
 class CheckerGrailed:
 
@@ -44,6 +45,7 @@ class CheckerGrailed:
 
         self.sender_id = id
         self.url = url
+        # TODO set to false when in production
         self.first_time = True  # Prevent initial links from being marked as new
         # NOT NEEDED ANYMORE due to using redis to store old items
 
