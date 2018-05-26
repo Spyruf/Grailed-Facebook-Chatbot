@@ -1,14 +1,17 @@
 import time
 import datetime
 from pytz import timezone
-from threading import Thread
 from colorama import Fore, Back, Style
 
+from threading import Thread
+
 import os
+import signal
 import sys
 import json
 import traceback
-import inspect
+
+from dotenv import load_dotenv
 
 from selenium import webdriver
 import selenium.common.exceptions
@@ -19,9 +22,11 @@ import objgraph
 
 import requests
 from flask import Flask, request
+from werkzeug.serving import make_server
 
 app = Flask(__name__)
 
+load_dotenv()
 redis_db = redis.from_url(os.environ.get("REDIS_URL"), decode_responses=True)
 local = os.environ.get("LOCAL")
 
@@ -34,10 +39,14 @@ done = set()
 eastern = timezone('US/Eastern')
 datetime.datetime.now(eastern)
 
+# TODO clean up flags aka runner
 
-# TODO close chromedriver when improperly terminated
+# TODO close chromedriver when improperly terminated = graceful termination in SIGINT SIGTERM SIGKILL
 # TODO stop creating threads for each one, maybe chrome driver isn't cleaning up properly
 # TODO check if multiple chrome drivers are being created via ps:exec and top to ssh into the actual server
+
+
+# TODO Cleanup self.running  / fix use of flag for proper cleanup for threads
 # Object / Class for each separate link
 class CheckerGrailed:
 
@@ -323,13 +332,16 @@ class CheckerGrailed:
 #         log(Fore.YELLOW + "New Item: " + message)
 #         return message
 
+runner = True
+
 
 def run_queue():
     global tasks
     global queue
     global done
+    global runner
 
-    while True:
+    while True and runner:
         if len(tasks) is 0:  # if no tasks exist
             pass
         elif len(queue) is 0:  # if no remaining tasks exist
@@ -358,11 +370,10 @@ def run_queue():
             else:
                 pass
             # print(Fore.RED, queue, done)
+    log(Fore.GREEN + "Stopped Runner" + Style.RESET_ALL)
 
 
 def add_to_queue(id, url):
-    log(Fore.LIGHTCYAN_EX + "Adding new checker to queue" + Style.RESET_ALL)
-
     # https check
 
     if "www." not in url:
@@ -379,11 +390,14 @@ def add_to_queue(id, url):
         task = CheckerGrailed(id, url)
         tasks.add(task)
         queue.add(task)
-    # Mercari
-    # elif "mercari" in url:
-    #     task = CheckerMercari(id, url)
-    #     tasks.add(task)
-    #     queue.add(task)
+        log(Fore.LIGHTCYAN_EX + "Added new checker to queue" + Style.RESET_ALL)
+
+
+# Mercari
+# elif "mercari" in url:
+#     task = CheckerMercari(id, url)
+#     tasks.add(task)
+#     queue.add(task)
 
 
 # Check if message sent is a valid link
@@ -401,6 +415,8 @@ def check_link(url):
 
 
 def status(sender_id):
+    global tasks
+
     send_message(sender_id, "Currently Monitoring:")
     log(Fore.MAGENTA + "All Tasks are:")
     ming = False
@@ -417,6 +433,8 @@ def status(sender_id):
 
 
 def reset(sender_id):
+    global tasks
+
     log(Fore.YELLOW + "Resetting tasks for sender_id: " + str(sender_id))
     send_message(sender_id, "OK, stopping all monitors. Please wait 30 seconds for status to update")
     removing = set()
@@ -439,6 +457,8 @@ def reset(sender_id):
 
 # This is where creating a new checker is decided
 def exists(sender_id, message_text):
+    global tasks
+
     to_send = True
     for t in tasks:
         if t.name is not None:
@@ -469,7 +489,7 @@ def startup():
     log(Fore.CYAN + "LOCAL: " + os.environ["LOCAL"])
     log(Style.RESET_ALL)
 
-    Thread(target=memory_summary).start()
+    # Thread(target=memory_summary).start()
 
     # Add redis tasks to queue
     task_names = redis_db.smembers('tasks')
@@ -619,10 +639,75 @@ def memory_summary():
 
 def check_mem():
     while True:
-        print("------------------------------------------------------------------------------------------------------")
+        print(
+            "------------------------------------------------------------------------------------------------------")
         objgraph.show_most_common_types()
         time.sleep(5)
 
 
+class ServerThread(Thread):
+
+    def __init__(self, app):
+        Thread.__init__(self)
+        self.srv = make_server('127.0.0.1', 5000, app)
+        self.ctx = app.app_context()
+        self.ctx.push()
+
+    def run(self):
+        log('starting server')
+        self.srv.serve_forever()
+
+    def shutdown(self):
+        self.srv.shutdown()
+
+
+def start_server():
+    global server
+    global app
+    server = ServerThread(app)
+    server.start()
+    log(Fore.GREEN + "Server Started" + Style.RESET_ALL)
+
+
+def stop_server():
+    global server
+    server.shutdown()
+    log(Fore.GREEN + "Server Stopped" + Style.RESET_ALL)
+
+
+def service_shutdown(signum, frame):
+    print('\nCaught signal %d' % signum)
+    raise ServiceExit
+
+
+class ServiceExit(Exception):
+    """
+    Custom exception which is used to trigger the clean exit
+    of all running threads and the main program.
+    """
+    pass
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+
+    # Register the signal handlers
+    signal.signal(signal.SIGTERM, service_shutdown)
+    signal.signal(signal.SIGINT, service_shutdown)
+
+    # start the server in a thread
+    # server = ServerThread(app)
+    start_server()
+
+    try:
+        while True:
+            time.sleep(1)  # need to keep this running for signal to work
+    except ServiceExit:
+        # can use flags or just call the methods?
+        stop_server()
+        runner = False
+        print(len(tasks))
+        for task in tasks:
+            if task.driver is not None:
+                task.driver.quit()
+        log(Fore.GREEN + "Done killing stuff" + Fore.RESET)
+    log(Fore.GREEN + "Server and processes killed gracefully" + Fore.RESET)
