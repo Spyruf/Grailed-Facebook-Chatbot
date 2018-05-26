@@ -189,137 +189,137 @@ class CheckerGrailed:
         return message
 
 
-class CheckerMercari:
-
-    def __init__(self, id, url):
-
-        self.sender_id = id
-        self.url = url
-        self.first_time = True  # Prevent initial links from being marked as new
-        self.old_items = set()
-
-        self.name = str(id) + "|" + url
-
-        self.running = True
-
-        self.options = webdriver.ChromeOptions()
-        self.options.add_argument('headless')
-        if local == "0":
-            self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
-        self.driver = None
-
-    def start_selenium(self):
-        while True:
-            try:
-                self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
-                break
-            except Exception:
-                log(Fore.RED + "Couldn't start selenium, trying again after 10 seconds")
-                log(print(traceback.format_exc()))
-                time.sleep(10)
-
-    def load_url(self):
-        try:
-            self.driver.get(self.url)  # open link in selenium
-            log(Fore.YELLOW + "Page Loaded: " + self.name + Style.RESET_ALL)
-        except selenium.common.exceptions.TimeoutException as ex:
-            log(Fore.RED + "load_url Selenium Exception: " + ex.msg)
-            log(Fore.RED + "ID: " + str(self.sender_id))
-            log(Fore.RED + "URL: " + self.url)
-            self.driver.quit()
-        except Exception:
-            log(Fore.RED + "Some error in load_url")
-            log(Fore.RED + "ID: " + str(self.sender_id))
-            log(Fore.RED + "URL: " + self.url)
-            log(print(traceback.format_exc()))
-
-    def get_listings(self):
-        # log(Fore.YELLOW + "Started Checking" + Style.RESET_ALL)
-        try:
-            self.start_selenium()
-
-            self.load_url()
-
-            html = self.driver.page_source  # get raw html
-            soup = bs(html, "html.parser")  # convert to soup
-
-            if "The product can not be found." in html:
-                log(Fore.YELLOW + "no items fit this criteria." + Style.RESET_ALL)
-                self.old_items = set()
-
-            else:
-                listings = soup.find_all("section", class_="items-box")  # get listings from the soup
-
-                # Retry once if the page loads without any listings
-                if len(listings) == 0:
-                    self.load_url()
-                    log(Fore.RED + "Listings didn't load, now waiting 10 seconds" + Style.RESET_ALL)
-                    log(Fore.RED + "ID: " + str(self.sender_id))
-                    log(Fore.RED + "URL: " + self.url)
-                    time.sleep(10)
-
-                    html = self.driver.page_source  # get raw html
-                    soup = bs(html, "html.parser")  # convert to soup
-                    listings = soup.find_all("section", class_="items-box")  # get listings from the soup
-
-                # Fill current items
-                current_items = set()
-                for item in listings:
-                    if item.a is not None:
-                        current_items.add(item.a.get("href"))
-
-                diff = current_items.difference(self.old_items)
-                if diff and self.first_time is not True:
-                    self.send_links(diff)
-                else:
-                    self.first_time = False
-
-                self.old_items = current_items
-
-            self.driver.quit()
-            # log(Fore.YELLOW + "Stopped Checking" + Style.RESET_ALL)
-        except selenium.common.exceptions.TimeoutException as ex:
-            log(Fore.RED + "Selenium Exception: " + ex.msg)
-            log(Fore.RED + "ID: " + str(self.sender_id))
-            log(Fore.RED + "URL: " + self.url)
-            self.driver.quit()
-        except Exception as ex:
-            log(Fore.RED + "Other exception in get_listings(): ")
-            try:
-                log(Fore.RED + ex)
-                log(Fore.RED + ex.msg)
-            except:
-                # func = inspect.currentframe().f_back.f_code
-                error(
-                    "Could not print error message",
-                    "get_listings",  # func.co_name,
-                    self.sender_id,
-                    self.url
-                )
-            self.driver.quit()
-        self.driver.quit()
-
-    def send_links(self, diff):
-        send_message(self.sender_id, "New Items!")  # if self.running else exit()
-        for item in diff:
-            # item_link = "https://www.grailed.com" + item
-            send_message(self.sender_id, self.get_item_info(item))  # if self.running else exit()
-
-    def get_item_info(self, item_link):
-        self.driver.get(item_link)
-        html = self.driver.page_source
-        soup = bs(html, "html.parser")
-
-        # brand = soup.find(class_="designer").text.replace('\n', '')
-        name = soup.find(class_="item-name").text.replace('\n', '')
-        # size = soup.find(class_="listing-size").text.replace('\n', '')
-        price = soup.find(class_="item-price bold").text.replace('\n', '')
-
-        # message = brand + '\n' + name + '\n' + size + '\n' + price + '\n' + item_link
-        message = name + '\n' + price + '\n' + item_link
-
-        log(Fore.YELLOW + "New Item: " + message)
-        return message
+# class CheckerMercari:
+#
+#     def __init__(self, id, url):
+#
+#         self.sender_id = id
+#         self.url = url
+#         self.first_time = True  # Prevent initial links from being marked as new
+#         self.old_items = set()
+#
+#         self.name = str(id) + "|" + url
+#
+#         self.running = True
+#
+#         self.options = webdriver.ChromeOptions()
+#         self.options.add_argument('headless')
+#         if local == "0":
+#             self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
+#         self.driver = None
+#
+#     def start_selenium(self):
+#         while True:
+#             try:
+#                 self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
+#                 break
+#             except Exception:
+#                 log(Fore.RED + "Couldn't start selenium, trying again after 10 seconds")
+#                 log(print(traceback.format_exc()))
+#                 time.sleep(10)
+#
+#     def load_url(self):
+#         try:
+#             self.driver.get(self.url)  # open link in selenium
+#             log(Fore.YELLOW + "Page Loaded: " + self.name + Style.RESET_ALL)
+#         except selenium.common.exceptions.TimeoutException as ex:
+#             log(Fore.RED + "load_url Selenium Exception: " + ex.msg)
+#             log(Fore.RED + "ID: " + str(self.sender_id))
+#             log(Fore.RED + "URL: " + self.url)
+#             self.driver.quit()
+#         except Exception:
+#             log(Fore.RED + "Some error in load_url")
+#             log(Fore.RED + "ID: " + str(self.sender_id))
+#             log(Fore.RED + "URL: " + self.url)
+#             log(print(traceback.format_exc()))
+#
+#     def get_listings(self):
+#         # log(Fore.YELLOW + "Started Checking" + Style.RESET_ALL)
+#         try:
+#             self.start_selenium()
+#
+#             self.load_url()
+#
+#             html = self.driver.page_source  # get raw html
+#             soup = bs(html, "html.parser")  # convert to soup
+#
+#             if "The product can not be found." in html:
+#                 log(Fore.YELLOW + "no items fit this criteria." + Style.RESET_ALL)
+#                 self.old_items = set()
+#
+#             else:
+#                 listings = soup.find_all("section", class_="items-box")  # get listings from the soup
+#
+#                 # Retry once if the page loads without any listings
+#                 if len(listings) == 0:
+#                     self.load_url()
+#                     log(Fore.RED + "Listings didn't load, now waiting 10 seconds" + Style.RESET_ALL)
+#                     log(Fore.RED + "ID: " + str(self.sender_id))
+#                     log(Fore.RED + "URL: " + self.url)
+#                     time.sleep(10)
+#
+#                     html = self.driver.page_source  # get raw html
+#                     soup = bs(html, "html.parser")  # convert to soup
+#                     listings = soup.find_all("section", class_="items-box")  # get listings from the soup
+#
+#                 # Fill current items
+#                 current_items = set()
+#                 for item in listings:
+#                     if item.a is not None:
+#                         current_items.add(item.a.get("href"))
+#
+#                 diff = current_items.difference(self.old_items)
+#                 if diff and self.first_time is not True:
+#                     self.send_links(diff)
+#                 else:
+#                     self.first_time = False
+#
+#                 self.old_items = current_items
+#
+#             self.driver.quit()
+#             # log(Fore.YELLOW + "Stopped Checking" + Style.RESET_ALL)
+#         except selenium.common.exceptions.TimeoutException as ex:
+#             log(Fore.RED + "Selenium Exception: " + ex.msg)
+#             log(Fore.RED + "ID: " + str(self.sender_id))
+#             log(Fore.RED + "URL: " + self.url)
+#             self.driver.quit()
+#         except Exception as ex:
+#             log(Fore.RED + "Other exception in get_listings(): ")
+#             try:
+#                 log(Fore.RED + ex)
+#                 log(Fore.RED + ex.msg)
+#             except:
+#                 # func = inspect.currentframe().f_back.f_code
+#                 error(
+#                     "Could not print error message",
+#                     "get_listings",  # func.co_name,
+#                     self.sender_id,
+#                     self.url
+#                 )
+#             self.driver.quit()
+#         self.driver.quit()
+#
+#     def send_links(self, diff):
+#         send_message(self.sender_id, "New Items!")  # if self.running else exit()
+#         for item in diff:
+#             # item_link = "https://www.grailed.com" + item
+#             send_message(self.sender_id, self.get_item_info(item))  # if self.running else exit()
+#
+#     def get_item_info(self, item_link):
+#         self.driver.get(item_link)
+#         html = self.driver.page_source
+#         soup = bs(html, "html.parser")
+#
+#         # brand = soup.find(class_="designer").text.replace('\n', '')
+#         name = soup.find(class_="item-name").text.replace('\n', '')
+#         # size = soup.find(class_="listing-size").text.replace('\n', '')
+#         price = soup.find(class_="item-price bold").text.replace('\n', '')
+#
+#         # message = brand + '\n' + name + '\n' + size + '\n' + price + '\n' + item_link
+#         message = name + '\n' + price + '\n' + item_link
+#
+#         log(Fore.YELLOW + "New Item: " + message)
+#         return message
 
 
 def run_queue():
@@ -372,20 +372,23 @@ def add_to_queue(id, url):
     redis_db.sadd('tasks', str(id) + "|" + url)  # values in tasks are the Checker object names
 
     # create task object, add to tasks, add to queue
+    # TODO create functionality in check_link() to return link type
     if "grailed" in url:
         task = CheckerGrailed(id, url)
         tasks.add(task)
         queue.add(task)
-    elif "mercari" in url:
-        task = CheckerMercari(id, url)
-        tasks.add(task)
-        queue.add(task)
+    # Mercari
+    # elif "mercari" in url:
+    #     task = CheckerMercari(id, url)
+    #     tasks.add(task)
+    #     queue.add(task)
 
 
 # Check if message sent is a valid link
 def check_link(url):
-    if "mercari" in url and " " not in url:
-        return True
+    # Mercari
+    # if "mercari" in url and " " not in url:
+    #     return True
     if "grailed.com/feed/" in url and " " not in url:
         return True
     if "grailed.com/shop/" in url and " " not in url:
