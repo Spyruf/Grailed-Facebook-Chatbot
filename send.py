@@ -87,7 +87,7 @@ if __name__ == '__main__':
         message = input("What message would you like to send?\n")
     else:
         l1 = "Due to a recent bug with incorrect/repeat items being sent, a max of 5 new item will be sent on each feed check. Sorry for this inconvenience, these issues will be resolved shortly."
-        l2 = " If you have a specific issue and would like to leave detailed feedback please do so here: https://goo.gl/forms/jcWFG9l0Gs7B3o402"
+        l2 = " If you have a specific issue and would like to leave detailed feedback, please do so here: https://goo.gl/forms/jcWFG9l0Gs7B3o402"
         l3 = " Thank you for your patience and support!"
         message = l1 + l2 + l3
 
