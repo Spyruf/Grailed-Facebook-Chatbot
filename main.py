@@ -108,7 +108,7 @@ class CheckerGrailed:
                         current_items.add(item.a.get("href"))
 
                 diff = current_items.difference(self.old_items)
-                if diff and self.first_time is not True:
+                if diff and self.first_time is not True and len(diff) < 5:
                     self.send_links(diff)
                 else:
                     self.first_time = False
