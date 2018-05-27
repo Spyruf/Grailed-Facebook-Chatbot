@@ -35,9 +35,13 @@ tasks = set()
 queue = set()
 done = set()
 
+runner = None
+done_killing = False
+
 # define eastern timezone
 eastern = timezone('US/Eastern')
 datetime.datetime.now(eastern)
+
 
 # TODO clean up flags aka runner
 
@@ -71,19 +75,20 @@ class CheckerGrailed:
         self.driver = None
 
     def start_selenium(self):
-        while True:
-            try:
-                self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
-                break
-            except Exception:
-                # func = inspect.currentframe().f_back.f_code
-                error(
-                    "Couldn't start selenium, trying again after 10 seconds",
-                    "start_selenium",  # func.co_name,
-                    self.sender_id,
-                    self.url
-                )
-                time.sleep(10)
+        try:
+            self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
+            # break
+        except Exception:
+            # func = inspect.currentframe().f_back.f_code
+            error(
+                "Couldn't start selenium, trying again after 10 seconds",
+                "start_selenium",  # func.co_name,
+                self.sender_id,
+                self.url
+            )
+            time.sleep(10)
+            self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
+
 
     def load_url(self):
         try:
@@ -159,8 +164,6 @@ class CheckerGrailed:
 
                 del self.old_items
 
-            self.driver.quit()
-            # log(Fore.YELLOW + "Stopped Checking" + Style.RESET_ALL)
         except selenium.common.exceptions.TimeoutException as ex:
             # func = inspect.currentframe().f_back.f_code
             error(
@@ -169,7 +172,6 @@ class CheckerGrailed:
                 self.sender_id,
                 self.url
             )
-            self.driver.quit()
         except Exception as ex:
             error(
                 "Other exception in get_listings(): ",
@@ -177,7 +179,8 @@ class CheckerGrailed:
                 self.sender_id,
                 self.url
             )
-            self.driver.quit()
+        self.driver.quit()
+        # log(Fore.YELLOW + "Stopped Checking" + Style.RESET_ALL)
 
     def send_links(self, diff):
         send_message(self.sender_id, "New Items!")  # if self.running else exit()
@@ -332,16 +335,17 @@ class CheckerGrailed:
 #         log(Fore.YELLOW + "New Item: " + message)
 #         return message
 
-runner = True
-
 
 def run_queue():
     global tasks
     global queue
     global done
     global runner
+    global done_killing
 
-    while True and runner:
+    runner = True
+
+    while runner:
         if len(tasks) is 0:  # if no tasks exist
             pass
         elif len(queue) is 0:  # if no remaining tasks exist
@@ -370,7 +374,17 @@ def run_queue():
             else:
                 pass
             # print(Fore.RED, queue, done)
-    log(Fore.GREEN + "Stopped Runner" + Style.RESET_ALL)
+
+    kill_drivers()
+    log(Fore.GREEN + "Runner Killed" + Style.RESET_ALL)
+    done_killing = True
+
+
+def kill_drivers():
+    for task in tasks:
+        if task.driver is not None:
+            task.driver.quit()
+    log(Fore.GREEN + "Quit all ChromeDrivers" + Style.RESET_ALL)
 
 
 def add_to_queue(id, url):
@@ -704,10 +718,10 @@ if __name__ == '__main__':
     except ServiceExit:
         # can use flags or just call the methods?
         stop_server()
-        runner = False
-        print(len(tasks))
-        for task in tasks:
-            if task.driver is not None:
-                task.driver.quit()
+        if runner is not None:
+            runner = False
+            while done_killing is False:
+                pass
+
         log(Fore.GREEN + "Done killing stuff" + Fore.RESET)
     log(Fore.GREEN + "Server and processes killed gracefully" + Fore.RESET)
