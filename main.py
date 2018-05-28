@@ -1,16 +1,9 @@
-import time
-import datetime
-from pytz import timezone
-from colorama import Fore, Back, Style
-
+import time, datetime
+import os, signal, sys, json, traceback
 from threading import Thread
 
-import os
-import signal
-import sys
-import json
-import traceback
-
+from pytz import timezone
+from colorama import Fore, Back, Style
 from dotenv import load_dotenv
 
 from selenium import webdriver
@@ -36,7 +29,8 @@ tasks = set()
 queue = set()
 done = set()
 
-# Global Kill Flags for unique threads
+#  Global Kill Flags for unique threads
+
 kill_switch = False  # Global kill switch that determines when to gracefully kill threads
 runner = None  # Kill Switch flag for the Queue Runner thread
 done_killing = False  # Global flag that determines
@@ -330,7 +324,7 @@ class CheckerGrailed:
 #         log(Fore.YELLOW + "New Item: " + message)
 #         return message
 
-### Task runner methods - manages the jobs
+# Task runner methods - manages the jobs
 
 def add_to_queue(id, url):
     # https check
@@ -427,7 +421,7 @@ def check_link(url):
         return False
 
 
-### User input processing methods
+# User input processing methods
 
 def status(sender_id):
     """
@@ -534,7 +528,7 @@ def send_message(recipient_id, message_text):
         print(Fore.GREEN + response.text + Fore.RESET)
 
 
-### Flask App Routes
+# Flask App Routes
 
 @app.before_first_request
 def startup():
@@ -632,7 +626,7 @@ def webhook():
     return "ok", 200
 
 
-### Logging Methods
+# Logging Methods
 
 def error(message, function_name, id, url):
     log(Fore.MAGENTA + function_name)
@@ -655,7 +649,7 @@ def log(msg, *args, **kwargs):  # simple wrapper for logging to stdout on heroku
     sys.stdout.flush()
 
 
-### Memory Checking Methods
+# Memory Checking Methods
 
 def memory_summary():
     while True:
@@ -676,7 +670,7 @@ def check_mem():
         time.sleep(5)
 
 
-### Server starting and killing methods
+# Server starting and killing methods
 
 
 class ServerThread(Thread):
@@ -723,7 +717,6 @@ def service_shutdown(signum, frame):
 
 def graceful_killer():
     global runner
-
     stop_server()
     if runner is not None:
         runner = False
