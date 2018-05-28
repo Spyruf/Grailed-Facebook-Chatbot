@@ -691,8 +691,8 @@ class ServerThread(Thread):
 
 def start_server(app):
     global server
-    server = ServerThread(app)
-    server.start()
+    server = ServerThread(app)  # creates a thread for the server
+    server.start()  # this calls run
     log(Fore.GREEN + "Server Started" + Style.RESET_ALL)
 
 
