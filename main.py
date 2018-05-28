@@ -35,6 +35,8 @@ tasks = set()
 queue = set()
 done = set()
 
+kill_switch = False
+
 runner = None
 done_killing = False
 
@@ -88,7 +90,6 @@ class CheckerGrailed:
             )
             time.sleep(10)
             self.driver = webdriver.Chrome(executable_path='chromedriver', chrome_options=self.options)
-
 
     def load_url(self):
         try:
@@ -690,8 +691,10 @@ def stop_server():
 
 
 def service_shutdown(signum, frame):
-    print('\nCaught signal %d' % signum)
-    raise ServiceExit
+    log(Fore.RED + 'Caught signal %d' % signum + Style.RESET_ALL)
+    global kill_switch
+    kill_switch = True
+    # raise ServiceExit
 
 
 class ServiceExit(Exception):
@@ -712,16 +715,16 @@ if __name__ == '__main__':
     # server = ServerThread(app)
     start_server()
 
-    try:
-        while True:
-            time.sleep(1)  # need to keep this running for signal to work
-    except ServiceExit:
-        # can use flags or just call the methods?
-        stop_server()
-        if runner is not None:
-            runner = False
-            while done_killing is False:
-                pass
+    # global kill_switch
+    while kill_switch is False:
+        pass
+    # can use flags or just call the methods?
+    stop_server()
+
+    if runner is not None:
+        runner = False
+        while done_killing is False:
+            pass
 
         log(Fore.GREEN + "Done killing stuff" + Fore.RESET)
     log(Fore.GREEN + "Server and processes killed gracefully" + Fore.RESET)
