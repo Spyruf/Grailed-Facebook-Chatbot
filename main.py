@@ -24,43 +24,37 @@ import requests
 from flask import Flask, request
 from werkzeug.serving import make_server
 
-app = Flask(__name__)
+# define eastern timezone
+eastern = timezone('US/Eastern')
+datetime.datetime.now(eastern)
 
 load_dotenv()
 redis_db = redis.from_url(os.environ.get("REDIS_URL"), decode_responses=True)
 local = os.environ.get("LOCAL")
 
 tasks = set()
-
 queue = set()
 done = set()
 
-kill_switch = False
+# Global Kill Flags for unique threads
+kill_switch = False  # Global kill switch that determines when to gracefully kill threads
+runner = None  # Kill Switch flag for the Queue Runner thread
+done_killing = False  # Global flag that determines
 
-runner = None
-done_killing = False
-
-# define eastern timezone
-eastern = timezone('US/Eastern')
-datetime.datetime.now(eastern)
-
-
-# TODO clean up flags aka runner
-
-# TODO close chromedriver when improperly terminated = graceful termination in SIGINT SIGTERM SIGKILL
-# TODO stop creating threads for each one, maybe chrome driver isn't cleaning up properly
-# TODO check if multiple chrome drivers are being created via ps:exec and top to ssh into the actual server
+app = Flask(__name__)
+server = None
 
 
 # TODO Cleanup self.running  / fix use of flag for proper cleanup for threads
-# Object / Class for each separate link
+# TODO stop creating a new object for each link since data since old_items are being stored on redis
+# New Object is created for each link
 class CheckerGrailed:
 
     def __init__(self, id, url):
 
         self.sender_id = id
         self.url = url
-        # TODO set to false when in production
+        # TODO set to false when in production after running locally for a bit
         self.first_time = True  # Prevent initial links from being marked as new
         # NOT NEEDED ANYMORE due to using redis to store old items
 
@@ -336,6 +330,33 @@ class CheckerGrailed:
 #         log(Fore.YELLOW + "New Item: " + message)
 #         return message
 
+### Task runner methods - manages the jobs
+
+def add_to_queue(id, url):
+    # https check
+
+    if "www." not in url:
+        url = "www." + url
+    if "https" not in url:
+        url = "https://" + url
+
+    # add to redis
+    redis_db.sadd('tasks', str(id) + "|" + url)  # values in tasks are the Checker object names
+
+    # create task object, add to tasks, add to queue
+    # TODO create functionality in check_link() to return link type, create single point of checking
+    if "grailed" in url:
+        task = CheckerGrailed(id, url)
+        tasks.add(task)
+        queue.add(task)
+        log(Fore.LIGHTCYAN_EX + "Added new checker to queue" + Style.RESET_ALL)
+
+    # Mercari
+    # elif "mercari" in url:
+    #     task = CheckerMercari(id, url)
+    #     tasks.add(task)
+    #     queue.add(task)
+
 
 def run_queue():
     global tasks
@@ -388,35 +409,12 @@ def kill_drivers():
     log(Fore.GREEN + "Quit all ChromeDrivers" + Style.RESET_ALL)
 
 
-def add_to_queue(id, url):
-    # https check
-
-    if "www." not in url:
-        url = "www." + url
-    if "https" not in url:
-        url = "https://" + url
-
-    # add to redis
-    redis_db.sadd('tasks', str(id) + "|" + url)  # values in tasks are the Checker object names
-
-    # create task object, add to tasks, add to queue
-    # TODO create functionality in check_link() to return link type
-    if "grailed" in url:
-        task = CheckerGrailed(id, url)
-        tasks.add(task)
-        queue.add(task)
-        log(Fore.LIGHTCYAN_EX + "Added new checker to queue" + Style.RESET_ALL)
-
-
-# Mercari
-# elif "mercari" in url:
-#     task = CheckerMercari(id, url)
-#     tasks.add(task)
-#     queue.add(task)
-
-
-# Check if message sent is a valid link
 def check_link(url):
+    """
+    Check if message sent is a valid link
+    :param url:
+    :return:
+    """
     # Mercari
     # if "mercari" in url and " " not in url:
     #     return True
@@ -429,7 +427,14 @@ def check_link(url):
         return False
 
 
+### User input processing methods
+
 def status(sender_id):
+    """
+    Determine links being monitored for a specific user and send as messages
+    :param sender_id:
+    :return:
+    """
     global tasks
 
     send_message(sender_id, "Currently Monitoring:")
@@ -470,8 +475,13 @@ def reset(sender_id):
     del removing
 
 
-# This is where creating a new checker is decided
 def exists(sender_id, message_text):
+    """
+    Determine whether tasks already exists and to create a new checker
+    :param sender_id:
+    :param message_text:
+    :return:
+    """
     global tasks
 
     to_send = True
@@ -494,6 +504,37 @@ def help_message(sender_id):
     send_message(sender_id, "Send STATUS to see what links are being monitored")
     send_message(sender_id, "Send RESET to stop monitoring all links")
 
+
+def send_message(recipient_id, message_text):
+    if local == "1":
+        log("Pretending to send message to {recipient}".format(recipient=recipient_id))
+        # log("Pretending to send message to {recipient}: {text}".format(recipient=recipient_id, text=message_text))
+        return
+
+    url = "https://graph.facebook.com/v2.6/me/messages"
+
+    params = {"access_token": os.environ["PAGE_ACCESS_TOKEN"]}
+    headers = {"Content-Type": "application/json"}
+
+    data = json.dumps({
+        "recipient": {
+            "id": recipient_id
+        },
+        "messaging_type": "response",
+        "message": {
+            "text": message_text
+        }
+    })
+
+    # r = requests.post("https://graph.facebook.com/v2.6/me/messages", params=params, headers=headers, data=data)
+    response = requests.request("POST", url, data=data, headers=headers, params=params)
+
+    if response.status_code != 200:
+        log(Fore.GREEN + str(response.status_code) + Fore.RESET)
+        print(Fore.GREEN + response.text + Fore.RESET)
+
+
+### Flask App Routes
 
 @app.before_first_request
 def startup():
@@ -591,41 +632,14 @@ def webhook():
     return "ok", 200
 
 
+### Logging Methods
+
 def error(message, function_name, id, url):
     log(Fore.MAGENTA + function_name)
     log(Fore.RED + message)
     log(Fore.RED + "ID: " + str(id))
     log(Fore.RED + "URL: " + url)
     log(print(traceback.format_exc()))
-
-
-def send_message(recipient_id, message_text):
-    if local == "1":
-        log("Pretending to send message to {recipient}".format(recipient=recipient_id))
-        # log("Pretending to send message to {recipient}: {text}".format(recipient=recipient_id, text=message_text))
-        return
-
-    url = "https://graph.facebook.com/v2.6/me/messages"
-
-    params = {"access_token": os.environ["PAGE_ACCESS_TOKEN"]}
-    headers = {"Content-Type": "application/json"}
-
-    data = json.dumps({
-        "recipient": {
-            "id": recipient_id
-        },
-        "messaging_type": "response",
-        "message": {
-            "text": message_text
-        }
-    })
-
-    # r = requests.post("https://graph.facebook.com/v2.6/me/messages", params=params, headers=headers, data=data)
-    response = requests.request("POST", url, data=data, headers=headers, params=params)
-
-    if response.status_code != 200:
-        log(Fore.GREEN + str(response.status_code) + Fore.RESET)
-        print(Fore.GREEN + response.text + Fore.RESET)
 
 
 def log(msg, *args, **kwargs):  # simple wrapper for logging to stdout on heroku
@@ -640,6 +654,8 @@ def log(msg, *args, **kwargs):  # simple wrapper for logging to stdout on heroku
         pass  # squash logging errors in case of non-ascii text
     sys.stdout.flush()
 
+
+### Memory Checking Methods
 
 def memory_summary():
     while True:
@@ -660,6 +676,9 @@ def check_mem():
         time.sleep(5)
 
 
+### Server starting and killing methods
+
+
 class ServerThread(Thread):
 
     def __init__(self, app):
@@ -676,9 +695,8 @@ class ServerThread(Thread):
         self.srv.shutdown()
 
 
-def start_server():
+def start_server(app):
     global server
-    global app
     server = ServerThread(app)
     server.start()
     log(Fore.GREEN + "Server Started" + Style.RESET_ALL)
@@ -691,18 +709,26 @@ def stop_server():
 
 
 def service_shutdown(signum, frame):
+    """
+    Signal handler for SIGTERM and SIGKILL signals
+    This function is responsible for exiting the main running loop and moving to the gracefull_killer
+    :param signum:
+    :param frame:
+    :return:
+    """
     log(Fore.RED + 'Caught signal %d' % signum + Style.RESET_ALL)
     global kill_switch
     kill_switch = True
-    # raise ServiceExit
 
 
-class ServiceExit(Exception):
-    """
-    Custom exception which is used to trigger the clean exit
-    of all running threads and the main program.
-    """
-    pass
+def graceful_killer():
+    global runner
+
+    stop_server()
+    if runner is not None:
+        runner = False
+        while done_killing is False:
+            pass
 
 
 if __name__ == '__main__':
@@ -712,19 +738,10 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, service_shutdown)
 
     # start the server in a thread
-    # server = ServerThread(app)
-    start_server()
+    start_server(app)
 
-    # global kill_switch
     while kill_switch is False:
         pass
-    # can use flags or just call the methods?
-    stop_server()
+    graceful_killer()
 
-    if runner is not None:
-        runner = False
-        while done_killing is False:
-            pass
-
-        log(Fore.GREEN + "Done killing stuff" + Fore.RESET)
-    log(Fore.GREEN + "Server and processes killed gracefully" + Fore.RESET)
+    log(Fore.GREEN + "Server and threads killed gracefully" + Fore.RESET)
