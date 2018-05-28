@@ -113,7 +113,7 @@ class CheckerGrailed:
 
             if "Currently no items fit this criteria." in html:
                 log(Fore.YELLOW + "no items fit this criteria." + Style.RESET_ALL)
-                self.old_items = set()
+                redis_db.delete(self.name)  # remove all former old item
 
             else:
                 listings = soup.find_all("div", class_="feed-item")  # get listings from the soup
