@@ -531,7 +531,6 @@ def startup():
     log(Fore.CYAN + "CONFIG:")
     log(Fore.CYAN + "PAGE_ACCESS_TOKEN: " + os.environ["PAGE_ACCESS_TOKEN"])
     log(Fore.CYAN + "VERIFY_TOKEN: " + os.environ["VERIFY_TOKEN"])
-    log(Fore.CYAN + "CHECK_DELAY: " + os.environ["CHECK_DELAY"])
     log(Fore.CYAN + "LOCAL: " + os.environ["LOCAL"])
     log(Style.RESET_ALL)
 
