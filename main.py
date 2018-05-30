@@ -147,6 +147,8 @@ class CheckerGrailed:
                     if item.a is not None:
                         current_items.add(item.a.get("href"))
                 diff = current_items.difference(self.old_items)
+                if len(diff) > 0:
+                    log(Fore.MAGENTA + "Number of new items: " + str(len(diff)) + Style.RESET_ALL)
                 if diff and self.first_time is not True:
                     self.send_links(diff)
                 else:
