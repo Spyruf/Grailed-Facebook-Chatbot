@@ -1,48 +1,114 @@
 # Grailed Facebook Chatbot
 
-Facebook Chat Bot that monitors Graled.com Feed Links and sends notifications for new listings
+Grailed.com is a online marketplace similar to eBay but exclusively for clothing and fashion. 
 
-Product Website: https://rahulbatra.me/grailed/website/
+This chatbot monitors custom filters and sends Facebook notifications for new listings.
+
+
+Product Website with demo: https://rahulbatra.me/grailed/website/
 
 Facebook Page: https://www.facebook.com/Grailed-Feed-Notifications-542587252773234/
+
+![alt-text](example3.png)
 
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
 ### Prerequisites
-
-What things you need to install the software and how to install them
-
+ 
 ```
-Python
-Redis 
-
+Python 3.6.5
+PIP
+Selenium chromedriver (included)
+Heroku (optional)
 ```
+
 
 ### Installing
 
-A step by step series of examples that tell you how to get a development env running
 
-Say what the step will be
-
+Install Python package requirements 
 ```
-Give the example
+pip install -r requirements.txt
 ```
 
-And repeat
-
-```
-until finished
-```
-
-End with an example of getting some data out of the system or using it for a little demo
-
+Installing Heroku Support (instructions not tested)
+- Install Heroku-CLI (can be done through brew)
+- Create app on Heroku.com
+- Link local app with app on Heroku.com
 
 ## Deployment
 
-Add additional notes about how to deploy this on a live system
+
+Create the following environment variables with the appropriate information 
+```
+PAGE_ACCESS_TOKEN= [from facebook page]
+REDIS_URL=[location of redis database, can be a local database if running locally]
+WEB_CONCURRENCY=1
+LOCAL=[set to 1 if running locally, this ensures that no actual messages are sent to users]
+VERIFY_TOKEN=[from facebook page]
+```
+
+To run locally without Heroku
+
+```
+> python main.py
+```
+
+
+If using heroku run via
+
+```
+> heroku local
+```
+
+Sample output should begin with these lines
+
+
+```
+2018-05-30 00:49:52.898548: Port is: 5000
+2018-05-30 00:49:52.900885: Starting Server
+2018-05-30 00:49:52.901753: Server Started
+```
+
+The application only begins checking and processing links before the first request. You can manually run this via visting the index
+```
+http://localhost:5000
+```
+
+## Usage
+
+To use / test the application, send a message to the server via a Facebook account
+
+### Sample Input:
+* Grailed Feed Links
+    * Sample Input: https://www.grailed.com/feed/1234abc
+    * Begins monitoring the link if valid
+* "Status"
+    * Returns the current links being monitored for the specific Facebook user
+* "Reset"
+    * Stops monitoring all links for the specific Facebook user
+* All other input types will return the help message
+
+### Sample Output
+
+If running locally (configured in the environment), the server will log that a message would be sent 
+but will not actually send the message.
+```bash
+Pretending to send message to [recipient_id]
+```
+
+Otherwise, possible outputs are:
+```bash
+ID: [some ID number] New Item: [Name - Link]
+```
+```bash
+Resetting tasks for sender_id: [sender_id]
+```
+
+
+
 
 ## Built With
 
@@ -68,36 +134,5 @@ This project is licensed under the GPL-3.0 License - see the [LICENSE.md](LICENS
 
 
 
-
-
-# --------------------------------------------------------------------------------------------------------------------
-# Grailed-Push-Notifications
-### View website here: https://rahulbatra.me/grailed/website/
-
-Facebook Chat Bot that monitors Graled.com Feed Links and sends notifications for new listings
-
-Facebook Page Link: https://www.facebook.com/Grailed-Feed-Notifications-542587252773234/
-
-![alt-text](example3.png)
+## Screenshots
 ![alt-text](example2.png)
-
-
-### Supported Inputs
-#### 1. Grailed Feed Links
-  - e.g  https://www.grailed.com/feed/1234abc
-
-#### 2. Status
-  - Shows all current links being monitored
-
-#### 3. Reset
-  - Stops monitoring any links for the current user
-
-
-### Screenshots
-General
-
-![alt-text](example.png)
-
-New Items Format
-
-![alt-text](website/img/new.png)

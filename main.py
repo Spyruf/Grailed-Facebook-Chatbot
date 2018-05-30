@@ -680,7 +680,7 @@ class ServerThread(Thread):
         self.ctx.push()
 
     def run(self):
-        log('starting server')
+        log('Starting Server')
         self.srv.serve_forever()
 
     def shutdown(self):
