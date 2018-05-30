@@ -1,3 +1,9 @@
+# @Author: rahulbatra
+# @Date:   2018-05-30T13:33:28-04:00
+# @Last modified by:   rahulbatra
+# @Last modified time: 2018-05-30T13:51:40-04:00
+
+
 import time
 import datetime
 from threading import Thread
@@ -25,7 +31,8 @@ local = os.environ.get("LOCAL")
 
 
 def send_message(recipient_id, message_text):
-    log("sending message to {recipient}: {text}".format(recipient=recipient_id, text=message_text))
+    log("sending message to {recipient}: {text}".format(
+        recipient=recipient_id, text=message_text))
 
     url = "https://graph.facebook.com/v2.6/me/messages"
 
@@ -43,11 +50,12 @@ def send_message(recipient_id, message_text):
     })
 
     # r = requests.post("https://graph.facebook.com/v2.6/me/messages", params=params, headers=headers, data=data)
-    response = requests.request("POST", url, data=data, headers=headers, params=params)
+    response = requests.request(
+        "POST", url, data=data, headers=headers, params=params)
 
     if response.status_code != 200:
-        log(Fore.GREEN + str(response.status_code) + Fore.RESET)
-        print(Fore.GREEN + response.text + Fore.RESET)
+        log(Fore.RED + str(response.status_code) + Fore.RESET)
+        print(Fore.RED + response.text + Fore.RESET)
 
 
 def log(msg, *args, **kwargs):  # simple wrapper for logging to stdout on heroku
@@ -80,28 +88,37 @@ def get_IDs():
 
 if __name__ == '__main__':
 
+    messages = []
+
     ids = get_IDs()
     log(Fore.CYAN + "Total IDs: " + str(len(ids)) + Fore.RESET)
 
-    if input("Custom Message? Y/N: ") == "Y":
-        message = input("What message would you like to send?\n")
+    if input(Fore.YELLOW + "Custom Message? Y/N: " + Style.RESET_ALL) == "Y":
+        messages.append(
+            input(Fore.YELLOW + "What message would you like to send?\n" + Style.RESET_ALL))
+    elif input(Fore.YELLOW + "Everything is normal message? Y/N: " + Style.RESET_ALL) == "Y":
+        messages.append("Grailed-Feed-Notifications is back to running normally! Version 2.0 was released yesterday which features a more accurate way of determining new items and other general optimizations!")
+        messages.append("As always, thank you for your patience and support!")
     else:
-        l1 = "Due to a recent bug with incorrect/repeat items being sent, a max of 5 new item will be sent on each feed check. Sorry for this inconvenience, these issues will be resolved shortly."
-        l2 = " If you have a specific issue and would like to leave detailed feedback, please do so here: https://goo.gl/forms/jcWFG9l0Gs7B3o402"
-        l3 = " Thank you for your patience and support!"
-        message = l1 + l2 + l3
+        messages.append("Due to a recent bug with incorrect/repeat items being sent, a max of 5 new item will be sent on each feed check. Sorry for this inconvenience, these issues will be resolved shortly.")
+        messages.append(
+            "If you have a specific issue and would like to leave detailed feedback, please do so here: https://goo.gl/forms/jcWFG9l0Gs7B3o402")
+        messages.append("Thank you for your patience and support!")
 
-    print("The message is: ")
-    print(message)
+    log(Fore.YELLOW + "The message is: " + Style.RESET_ALL)
+    for item in messages:
+        print(Fore.GREEN + item + Style.RESET_ALL)
 
     if input("Test? Y/N: ") == "Y":
         log(Fore.CYAN + "Sending Test Message" + Fore.RESET)
         id = 2253201071372239
-        send_message(id, message)
+        for item in messages:
+            send_message(id, item)
 
     elif input("Confirm? Y/N: ") == "Y":
         log(Fore.CYAN + "Sending Mass Message" + Fore.RESET)
 
         for id in ids:
             log(Fore.MAGENTA + id + Fore.RESET)
-            send_message(id, message)
+            for item in messages:
+                send_message(id, item)

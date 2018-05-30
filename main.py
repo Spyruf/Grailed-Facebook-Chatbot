@@ -1,3 +1,10 @@
+# @Author: rahulbatra
+# @Date:   2018-05-30T02:09:47-04:00
+# @Last modified by:   rahulbatra
+# @Last modified time: 2018-05-30T13:51:28-04:00
+
+
+
 import time, datetime
 import os, signal, sys, json, traceback
 from threading import Thread
@@ -520,8 +527,8 @@ def send_message(recipient_id, message_text):
     response = requests.request("POST", url, data=data, headers=headers, params=params)
 
     if response.status_code != 200:
-        log(Fore.GREEN + str(response.status_code) + Fore.RESET)
-        print(Fore.GREEN + response.text + Fore.RESET)
+        log(Fore.RED + str(response.status_code) + Fore.RESET)
+        print(Fore.RED + response.text + Fore.RESET)
 
 
 # Flask App Routes
