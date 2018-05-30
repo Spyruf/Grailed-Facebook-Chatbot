@@ -30,6 +30,40 @@ redis_db = redis.from_url(os.environ.get("REDIS_URL"), decode_responses=True)
 local = os.environ.get("LOCAL")
 
 
+def send_image(recipient_id, image_link):
+    # if local == "1":
+    #     log("Pretending to send image to {recipient}".format(recipient=recipient_id))
+    #     # log("Pretending to send message to {recipient}: {text}".format(recipient=recipient_id, text=message_text))
+    #     return
+
+    url = "https://graph.facebook.com/v2.6/me/messages"
+
+    params = {"access_token": os.environ["PAGE_ACCESS_TOKEN"]}
+    headers = {"Content-Type": "application/json"}
+    data = json.dumps({
+        "recipient": {
+            "id": recipient_id
+        },
+        "message": {
+            "attachment": {
+                "type": "image",
+                "payload": {
+                    "url": image_link,
+                    "is_reusable": True
+                }
+            }
+        }
+
+    })
+
+    # r = requests.post("https://graph.facebook.com/v2.6/me/messages", params=params, headers=headers, data=data)
+    response = requests.request("POST", url, data=data, headers=headers, params=params)
+
+    if response.status_code != 200:
+        log(Fore.RED + str(response.status_code) + Fore.RESET)
+        print(Fore.RED + response.text + Fore.RESET)
+
+
 def send_message(recipient_id, message_text):
     log("sending message to {recipient}: {text}".format(
         recipient=recipient_id, text=message_text))
@@ -93,14 +127,19 @@ if __name__ == '__main__':
     ids = get_IDs()
     log(Fore.CYAN + "Total IDs: " + str(len(ids)) + Fore.RESET)
 
+    if input(Fore.YELLOW + "Send Test Image? Y/N: " + Style.RESET_ALL) == "Y":
+        send_image(2253201071372239, "http://via.placeholder.com/350x150")
+
     if input(Fore.YELLOW + "Custom Message? Y/N: " + Style.RESET_ALL) == "Y":
         messages.append(
             input(Fore.YELLOW + "What message would you like to send?\n" + Style.RESET_ALL))
     elif input(Fore.YELLOW + "Everything is normal message? Y/N: " + Style.RESET_ALL) == "Y":
-        messages.append("Grailed-Feed-Notifications is back to running normally! Version 2.0 was released yesterday which features a more accurate way of determining new items and other general optimizations!")
+        messages.append(
+            "Grailed-Feed-Notifications is back to running normally! Version 2.0 was released yesterday which features a more accurate way of determining new items and other general optimizations!")
         messages.append("As always, thank you for your patience and support!")
     else:
-        messages.append("Due to a recent bug with incorrect/repeat items being sent, a max of 5 new item will be sent on each feed check. Sorry for this inconvenience, these issues will be resolved shortly.")
+        messages.append(
+            "Due to a recent bug with incorrect/repeat items being sent, a max of 5 new item will be sent on each feed check. Sorry for this inconvenience, these issues will be resolved shortly.")
         messages.append(
             "If you have a specific issue and would like to leave detailed feedback, please do so here: https://goo.gl/forms/jcWFG9l0Gs7B3o402")
         messages.append("Thank you for your patience and support!")

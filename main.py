@@ -117,7 +117,8 @@ class CheckerGrailed:
 
             if "Currently no items fit this criteria." in html:
                 log(Fore.YELLOW + "no items fit this criteria." + Style.RESET_ALL)
-                redis_db.delete(self.name)  # remove all former old item
+                if local == "0":
+                    redis_db.delete(self.name)  # remove all former old item only if in production
 
             else:
                 listings = soup.find_all("div", class_="feed-item")  # get listings from the soup
@@ -151,9 +152,10 @@ class CheckerGrailed:
                 else:
                     self.first_time = False
 
-                redis_db.delete(self.name)  # remove all former old item
-                for cur in current_items:
-                    redis_db.sadd(self.name, cur)  # current items are new old items
+                if local == "0":
+                    redis_db.delete(self.name)  # remove all former old item only if in production
+                    for cur in current_items:
+                        redis_db.sadd(self.name, cur)  # current items are new old items only if in production
 
                 del self.old_items
 
@@ -193,7 +195,7 @@ class CheckerGrailed:
         price = soup.find(class_="price").text.replace('\n', '')
 
         message = brand + '\n' + name + '\n' + size + '\n' + price + '\n' + item_link
-        log(Fore.BLUE + "ID: " + self.sender_id + " New Item: " + name + item_link + Style.RESET_ALL)
+        log(Fore.BLUE + "ID: " + self.sender_id + " New Item: " + name + " " + item_link + Style.RESET_ALL)
         return message
 
     def get_item_image(self, item_link):
