@@ -39,7 +39,6 @@ app = Flask(__name__)
 server = None
 
 
-# TODO Cleanup self.running  / fix use of flag for proper cleanup for threads
 # TODO stop creating a new object for each link since data since old_items are being stored on redis
 # New Object is created for each link
 class CheckerGrailed:
@@ -48,8 +47,7 @@ class CheckerGrailed:
 
         self.sender_id = id
         self.url = url
-        # TODO set to false when in production after running locally for a bit
-        self.first_time = True  # Prevent initial links from being marked as new
+        self.first_time = False  # Prevent initial links from being marked as new
         # NOT NEEDED ANYMORE due to using redis to store old items
 
         self.name = str(id) + "|" + url
@@ -172,10 +170,10 @@ class CheckerGrailed:
         # log(Fore.YELLOW + "Stopped Checking" + Style.RESET_ALL)
 
     def send_links(self, diff):
-        send_message(self.sender_id, "New Items!")  # if self.running else exit()
+        send_message(self.sender_id, "New Items!")
         for item in diff:
             item_link = "https://www.grailed.com" + item
-            send_message(self.sender_id, self.get_item_info(item_link))  # if self.running else exit()
+            send_message(self.sender_id, self.get_item_info(item_link))
 
     def get_item_info(self, item_link):
         self.driver.get(item_link)
@@ -188,7 +186,7 @@ class CheckerGrailed:
         price = soup.find(class_="price").text.replace('\n', '')
 
         message = brand + '\n' + name + '\n' + size + '\n' + price + '\n' + item_link
-        log(Fore.YELLOW + "ID: " + self.sender_id + " New Item: " + name + item_link)
+        log(Fore.LIGHTYELLOW_EX + "ID: " + self.sender_id + " New Item: " + name + item_link + Style.RESET_ALL)
         return message
 
 
@@ -327,18 +325,10 @@ class CheckerGrailed:
 # Task runner methods - manages the jobs
 
 def add_to_queue(id, url):
-    # https check
-
-    if "www." not in url:
-        url = "www." + url
-    if "https" not in url:
-        url = "https://" + url
-
     # add to redis
     redis_db.sadd('tasks', str(id) + "|" + url)  # values in tasks are the Checker object names
 
     # create task object, add to tasks, add to queue
-    # TODO create functionality in check_link() to return link type, create single point of checking
     if "grailed" in url:
         task = CheckerGrailed(id, url)
         tasks.add(task)
@@ -405,17 +395,22 @@ def kill_drivers():
 
 def check_link(url):
     """
-    Check if message sent is a valid link
     :param url:
     :return:
     """
+    # https check
+    if "www." not in url:
+        url = "www." + url
+    if "https" not in url:
+        url = "https://" + url
+
     # Mercari
     # if "mercari" in url and " " not in url:
     #     return True
     if "grailed.com/feed/" in url and " " not in url:
-        return True
+        return url.split('?')[0]
     if "grailed.com/shop/" in url and " " not in url:
-        return True
+        return url.split('?')[0]
     else:
         log(Fore.RED + "INVALID URL" + Style.RESET_ALL)
         return False
@@ -469,11 +464,11 @@ def reset(sender_id):
     del removing
 
 
-def exists(sender_id, message_text):
+def exists(sender_id, url):
     """
     Determine whether tasks already exists and to create a new checker
     :param sender_id:
-    :param message_text:
+    :param url:
     :return:
     """
     global tasks
@@ -481,16 +476,17 @@ def exists(sender_id, message_text):
     to_send = True
     for t in tasks:
         if t.name is not None:
-            if message_text in str(t.name):
+            if url in str(t.name):
                 to_send = False
+                break
 
     if to_send is True:
         send_message(
-            sender_id, "Now watching: " + message_text)
-        add_to_queue(sender_id, message_text)
+            sender_id, "Now watching: " + url)
+        add_to_queue(sender_id, url)
     else:
         send_message(
-            sender_id, "Already Watching: " + message_text)
+            sender_id, "Already Watching: " + url)
 
 
 def help_message(sender_id):
@@ -594,6 +590,7 @@ def webhook():
                     try:
                         # the message's text
                         message_text = messaging_event["message"]["text"]
+                        url = check_link(message_text)
 
                         # Get Status
                         if message_text.upper() == "STATUS":
@@ -604,8 +601,8 @@ def webhook():
                             reset(sender_id)
 
                         # Recieved New Link
-                        elif check_link(message_text) is True:
-                            exists(sender_id, message_text)
+                        elif url is not False:
+                            exists(sender_id, url)
 
                         # Help Message
                         else:
