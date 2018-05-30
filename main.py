@@ -4,7 +4,6 @@
 # @Last modified time: 2018-05-30T13:51:28-04:00
 
 
-
 import time, datetime
 import os, signal, sys, json, traceback
 from threading import Thread
@@ -181,6 +180,7 @@ class CheckerGrailed:
         for item in diff:
             item_link = "https://www.grailed.com" + item
             send_message(self.sender_id, self.get_item_info(item_link))
+            send_image(self.sender_id, self.get_item_image(item_link))
 
     def get_item_info(self, item_link):
         self.driver.get(item_link)
@@ -195,6 +195,16 @@ class CheckerGrailed:
         message = brand + '\n' + name + '\n' + size + '\n' + price + '\n' + item_link
         log(Fore.BLUE + "ID: " + self.sender_id + " New Item: " + name + item_link + Style.RESET_ALL)
         return message
+
+    def get_item_image(self, item_link):
+        self.driver.get(item_link)
+        html = self.driver.page_source
+        soup = bs(html, "html.parser")
+
+        image_link = soup.find(class_="selected")['src']
+
+        log(Fore.BLUE + "ID: " + self.sender_id + " Image Link: " + image_link + Style.RESET_ALL)
+        return image_link
 
 
 # class CheckerMercari:
@@ -500,6 +510,40 @@ def help_message(sender_id):
     send_message(sender_id, "Send a Grailed Feed link to monitor\nIt should look like this grailed.com/feed/1234abc")
     send_message(sender_id, "Send STATUS to see what links are being monitored")
     send_message(sender_id, "Send RESET to stop monitoring all links")
+
+
+def send_image(recipient_id, image_link):
+    if local == "1":
+        log("Pretending to send image to {recipient}".format(recipient=recipient_id))
+        # log("Pretending to send message to {recipient}: {text}".format(recipient=recipient_id, text=message_text))
+        return
+
+    url = "https://graph.facebook.com/v2.6/me/messages"
+
+    params = {"access_token": os.environ["PAGE_ACCESS_TOKEN"]}
+    headers = {"Content-Type": "application/json"}
+    data = json.dumps({
+        "recipient": {
+            "id": recipient_id
+        },
+        "message": {
+            "attachment": {
+                "type": "image",
+                "payload": {
+                    "url": image_link,
+                    "is_reusable": True
+                }
+            }
+        }
+
+    })
+
+    # r = requests.post("https://graph.facebook.com/v2.6/me/messages", params=params, headers=headers, data=data)
+    response = requests.request("POST", url, data=data, headers=headers, params=params)
+
+    if response.status_code != 200:
+        log(Fore.RED + str(response.status_code) + Fore.RESET)
+        print(Fore.RED + response.text + Fore.RESET)
 
 
 def send_message(recipient_id, message_text):
