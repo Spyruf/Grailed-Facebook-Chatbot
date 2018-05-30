@@ -77,17 +77,18 @@ def get_IDs():
 
     return id_set
 
+
 if __name__ == '__main__':
 
     ids = get_IDs()
-    log(Fore.CYAN + "Total IDs: " + len(ids) + Fore.RESET)
+    log(Fore.CYAN + "Total IDs: " + str(len(ids)) + Fore.RESET)
 
     if input("Custom Message? Y/N: ") == "Y":
         message = input("What message would you like to send?\n")
     else:
-        l1 = "Grailed Feed Notifications is back up and running! "
-        l2 = "Sorry for any inconveniences during the last week, we are currently improving reliability and are planning to add new features soon! "
-        l3 = ""
+        l1 = "Due to a recent bug with incorrect/repeat items being sent, a max of 5 new item will be sent on each feed check. Sorry for this inconvenience, these issues will be resolved shortly."
+        l2 = " If you have a specific issue and would like to leave detailed feedback, please do so here: https://goo.gl/forms/jcWFG9l0Gs7B3o402"
+        l3 = " Thank you for your patience and support!"
         message = l1 + l2 + l3
 
     print("The message is: ")
