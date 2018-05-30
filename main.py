@@ -679,7 +679,7 @@ class ServerThread(Thread):
         Thread.__init__(self)
         port = int(os.environ.get("PORT", 5000))
         log("Port is: " + str(port))
-        self.srv = make_server('127.0.0.1', port, app)
+        self.srv = make_server('0.0.0.0', port, app)
         self.ctx = app.app_context()
         self.ctx.push()
 
