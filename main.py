@@ -182,6 +182,8 @@ class CheckerGrailed:
     def send_links(self, diff):
         send_message(self.sender_id, "New Items!")
         for item in diff:
+            if self.running is False:
+                break
             item_link = "https://www.grailed.com" + item
             send_message(self.sender_id, self.get_item_info(item_link))
             send_image(self.sender_id, self.get_item_image(item_link))
@@ -471,6 +473,7 @@ def reset(sender_id):
     for task in tasks:
         if task.name is not None and sender_id in str(task.name):
             # adds task to a temp remove set b/c can not modify set during traversal
+            task.running = False
             removing.add(task)
             redis_db.sadd("removing", str(task.name))
 
