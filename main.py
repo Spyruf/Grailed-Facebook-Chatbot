@@ -53,7 +53,7 @@ class CheckerGrailed:
 
         self.sender_id = id
         self.url = url
-        self.run_before = redis_db.exists(self.sender_id)  # Prevent initial links from being marked as new
+        self.run_before = redis_db.exists(self.url)  # Prevent initial links from being marked as new
         # NOT NEEDED ANYMORE due to using redis to store old items
 
         self.name = str(id) + "|" + url
@@ -155,7 +155,7 @@ class CheckerGrailed:
                     self.send_links(diff)
                 else:
                     log(Fore.MAGENTA + "First Time being run so ignoring sending items" + Style.RESET_ALL)
-                    redis_db.append(self.sender_id, 1)
+                    redis_db.append(self.url, 1)
                     self.run_before = True
 
                 if local == "0":
