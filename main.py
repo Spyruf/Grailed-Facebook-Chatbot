@@ -53,7 +53,7 @@ class CheckerGrailed:
 
         self.sender_id = id
         self.url = url
-        self.first_time = False  # Prevent initial links from being marked as new
+        self.run_before = redis_db.exists(self.sender_id)  # Prevent initial links from being marked as new
         # NOT NEEDED ANYMORE due to using redis to store old items
 
         self.name = str(id) + "|" + url
@@ -147,12 +147,15 @@ class CheckerGrailed:
                     if item.a is not None:
                         current_items.add(item.a.get("href"))
                 diff = current_items.difference(self.old_items)
+
+
                 if len(diff) > 0:
                     log(Fore.MAGENTA + "Number of new items: " + str(len(diff)) + Style.RESET_ALL)
-                if diff and self.first_time is not True:
+                if diff and self.run_before is True:
                     self.send_links(diff)
                 else:
-                    self.first_time = False
+                    redis_db.append(self.sender_id, 1)
+                    self.run_before = True
 
                 if local == "0":
                     redis_db.delete(self.name)  # remove all former old item only if in production
@@ -183,6 +186,7 @@ class CheckerGrailed:
         send_message(self.sender_id, "New Items!")
         for item in diff:
             if self.running is False:
+                log(Fore.RED + "Stopping mid sending links" + Style.RESET_ALL)
                 break
             item_link = "https://www.grailed.com" + item
             send_message(self.sender_id, self.get_item_info(item_link))
@@ -219,7 +223,7 @@ class CheckerGrailed:
 #
 #         self.sender_id = id
 #         self.url = url
-#         self.first_time = True  # Prevent initial links from being marked as new
+#         self.run_before = True  # Prevent initial links from being marked as new
 #         self.old_items = set()
 #
 #         self.name = str(id) + "|" + url
@@ -293,10 +297,10 @@ class CheckerGrailed:
 #                         current_items.add(item.a.get("href"))
 #
 #                 diff = current_items.difference(self.old_items)
-#                 if diff and self.first_time is not True:
+#                 if diff and self.run_before is not True:
 #                     self.send_links(diff)
 #                 else:
-#                     self.first_time = False
+#                     self.run_before = False
 #
 #                 self.old_items = current_items
 #
