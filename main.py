@@ -209,7 +209,7 @@ class CheckerGrailed:
 
         image_link = soup.find(class_="selected")['src']
 
-        log(Fore.BLUE + "ID: " + self.sender_id + " Image Link: " + image_link + Style.RESET_ALL)
+        # log(Fore.BLUE + "ID: " + self.sender_id + " Image Link: " + image_link + Style.RESET_ALL)
         return image_link
 
 
