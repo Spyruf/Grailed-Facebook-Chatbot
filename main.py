@@ -120,6 +120,14 @@ class CheckerGrailed:
                 if local == "0":
                     redis_db.delete(self.name)  # remove all former old item only if in production
 
+                if self.run_before is True:
+                    pass
+                else:
+                    log(Fore.MAGENTA + "First Time being run so ignoring sending items" + Style.RESET_ALL)
+                    redis_db.append(self.url, 1)
+                    self.run_before = True
+
+
             else:
                 listings = soup.find_all("div", class_="feed-item")  # get listings from the soup
 
