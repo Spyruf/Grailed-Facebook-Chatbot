@@ -148,12 +148,13 @@ class CheckerGrailed:
                         current_items.add(item.a.get("href"))
                 diff = current_items.difference(self.old_items)
 
-
                 if len(diff) > 0:
                     log(Fore.MAGENTA + "Number of new items: " + str(len(diff)) + Style.RESET_ALL)
+
                 if diff and self.run_before is True:
                     self.send_links(diff)
                 else:
+                    log(Fore.MAGENTA + "First Time being run so ignoring sending items" + Style.RESET_ALL)
                     redis_db.append(self.sender_id, 1)
                     self.run_before = True
 
