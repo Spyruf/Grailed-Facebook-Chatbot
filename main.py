@@ -549,7 +549,7 @@ def send_image(recipient_id, image_link):
     response = requests.request("POST", url, data=data, headers=headers, params=params)
 
     if response.status_code != 200:
-        log(Fore.RED + str(response.status_code) + Fore.RESET)
+        log(Fore.RED + "Error Code: " + str(response.status_code) + " recipient_id: " + str(recipient_id) + Fore.RESET)
         print(Fore.RED + response.text + Fore.RESET)
 
 
@@ -578,7 +578,7 @@ def send_message(recipient_id, message_text):
     response = requests.request("POST", url, data=data, headers=headers, params=params)
 
     if response.status_code != 200:
-        log(Fore.RED + str(response.status_code) + Fore.RESET)
+        log(Fore.RED + "Error Code: " + str(response.status_code) + " recipient_id: " + str(recipient_id) + Fore.RESET)
         print(Fore.RED + response.text + Fore.RESET)
 
 
