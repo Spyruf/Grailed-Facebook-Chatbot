@@ -53,7 +53,7 @@ class CheckerGrailed:
 
         self.sender_id = id
         self.url = url
-        self.run_before = redis_db.exists(self.url)  # Prevent initial links from being marked as new
+        self.run_before = None  # Prevent initial links from being marked as new
         # NOT NEEDED ANYMORE due to using redis to store old items
 
         self.name = str(id) + "|" + url
@@ -108,6 +108,8 @@ class CheckerGrailed:
     def get_listings(self):
         # log(Fore.YELLOW + "Started Checking" + Style.RESET_ALL)
         try:
+            self.run_before = redis_db.exists(self.url)  # Prevent initial links from being marked as new
+
             self.start_selenium()
 
             self.load_url()
@@ -122,9 +124,9 @@ class CheckerGrailed:
 
                 if self.run_before is True:
                     pass
-                else:
+                elif self.run_before is False:
                     log(Fore.MAGENTA + "First Time being run so ignoring sending items" + Style.RESET_ALL)
-                    redis_db.append(self.url, 1)
+                    redis_db.set(self.url, 1)
                     self.run_before = True
 
 
@@ -161,9 +163,9 @@ class CheckerGrailed:
 
                 if diff and self.run_before is True:
                     self.send_links(diff)
-                else:
+                elif self.run_before is False:
                     log(Fore.MAGENTA + "First Time being run so ignoring sending items" + Style.RESET_ALL)
-                    redis_db.append(self.url, 1)
+                    redis_db.set(self.url, 1)
                     self.run_before = True
 
                 if local == "0":
