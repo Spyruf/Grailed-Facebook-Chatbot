@@ -212,7 +212,7 @@ class CheckerGrailed:
         brand = soup.find(class_="designer").text.replace('\n', '')
         name = soup.find(class_="listing-title").text.replace('\n', '')
         size = soup.find(class_="listing-size").text.replace('\n', '')
-        # price = soup.find(class_="price").text.replace('\n', '') # TODO fix price
+        price = "-1" # soup.find(class_="price").text.replace('\n', '') # TODO fix price
 
         message = brand + '\n' + name + '\n' + size + '\n' + price + '\n' + item_link
         log(Fore.BLUE + "ID: " + self.sender_id + " New Item: " + name + " " + item_link + Style.RESET_ALL)
