@@ -1,7 +1,7 @@
 # @Author: rahulbatra
 # @Date:   2018-05-30T02:09:47-04:00
 # @Last modified by:   rahulbatra
-# @Last modified time: 2018-11-23T01:39:44-05:00
+# @Last modified time: 2018-11-23T01:44:02-05:00
 
 
 import time, datetime
@@ -674,7 +674,7 @@ def webhook():
                             elif local == "0":
                                 local = "1"
                                 send_message(dev_id, "Enabled Dev Mode")
-                            os.environ.get("LOCAL") = local
+                            os.environ["LOCAL"] = local
 
                         # Get Status
                         elif message_text.upper() == "STATUS":
