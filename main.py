@@ -1,7 +1,7 @@
 # @Author: rahulbatra
 # @Date:   2018-05-30T02:09:47-04:00
 # @Last modified by:   rahulbatra
-# @Last modified time: 2018-05-30T13:51:28-04:00
+# @Last modified time: 2018-11-23T01:39:44-05:00
 
 
 import time, datetime
@@ -30,6 +30,7 @@ datetime.datetime.now(eastern)
 load_dotenv()
 redis_db = redis.from_url(os.environ.get("REDIS_URL"), decode_responses=True)
 local = os.environ.get("LOCAL")
+dev_id = os.environ.get("DEV_ID")
 
 tasks = set()
 queue = set()
@@ -64,8 +65,8 @@ class CheckerGrailed:
 
         self.options = webdriver.ChromeOptions()
         self.options.add_argument('headless')
-        if local == "0":
-            self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
+        # if local == "0": # TODO: fix this
+        #     self.options.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
         self.driver = None
 
     def start_selenium(self):
@@ -665,8 +666,18 @@ def webhook():
                         message_text = messaging_event["message"]["text"]
                         url = check_link(message_text)
 
+                        if sender_id == dev_id and message_text.upper() == "DEV MODE":
+                            global local
+                            if local == "1":
+                                local = "0"
+                                send_message(dev_id, "Disabled Dev Mode")
+                            elif local == "0":
+                                local = "1"
+                                send_message(dev_id, "Enabled Dev Mode")
+                            os.environ.get("LOCAL") = local
+
                         # Get Status
-                        if message_text.upper() == "STATUS":
+                        elif message_text.upper() == "STATUS":
                             status(sender_id)
 
                         # Stop all monitors
