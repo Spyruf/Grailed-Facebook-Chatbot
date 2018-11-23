@@ -223,7 +223,7 @@ class CheckerGrailed:
         html = self.driver.page_source
         soup = bs(html, "html.parser")
 
-        image_link = soup.find(class_="selected")['src']
+        image_link = soup.find(class_="_selected")['src']
 
         # log(Fore.BLUE + "ID: " + self.sender_id + " Image Link: " + image_link + Style.RESET_ALL)
         return image_link
