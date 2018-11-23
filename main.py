@@ -1,7 +1,7 @@
 # @Author: rahulbatra
 # @Date:   2018-05-30T02:09:47-04:00
 # @Last modified by:   rahulbatra
-# @Last modified time: 2018-11-23T01:44:02-05:00
+# @Last modified time: 2018-11-23T01:49:52-05:00
 
 
 import time, datetime
@@ -537,7 +537,7 @@ def help_message(sender_id):
 
 
 def send_image(recipient_id, image_link):
-    if local == "1":
+    if recipient_id != dev_id and local == "1":
         log("Pretending to send image to {recipient}".format(recipient=recipient_id))
         # log("Pretending to send message to {recipient}: {text}".format(recipient=recipient_id, text=message_text))
         return
@@ -571,7 +571,7 @@ def send_image(recipient_id, image_link):
 
 
 def send_message(recipient_id, message_text):
-    if local == "1":
+    if recipient_id != dev_id and local == "1":
         log("Pretending to send message to {recipient}".format(recipient=recipient_id))
         # log("Pretending to send message to {recipient}: {text}".format(recipient=recipient_id, text=message_text))
         return
