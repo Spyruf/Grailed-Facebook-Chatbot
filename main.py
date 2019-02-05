@@ -87,6 +87,7 @@ class CheckerGrailed:
     def load_url(self):
         try:
             self.driver.get(self.url)  # open link in selenium
+            time.sleep(5)
             log(Fore.YELLOW + "Page Loaded: " + self.name + Style.RESET_ALL)
         except selenium.common.exceptions.TimeoutException as ex:
             # func = inspect.currentframe().f_back.f_code
