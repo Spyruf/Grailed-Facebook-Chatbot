@@ -138,8 +138,9 @@ if __name__ == '__main__':
         messages.append(
             input(Fore.YELLOW + "What message would you like to send?\n" + Style.RESET_ALL))
     elif input(Fore.YELLOW + "We are back message? Y/N: " + Style.RESET_ALL) == "Y":
+        messages.append("What's up, didn't have the best holiday shopping season? Don't worry, Grailed-Feed-Notifications is back!")    
         messages.append(
-            "Grailed-Feed-Notifications is back! There were some changes from Grailed and Facebook that we were finally able to respond to and fix the bot.")
+            "There were some changes from Grailed and Facebook that we were finally able to respond to. Just in time for you to find your grails for 2020")
         messages.append("Now is also a good time to run 'STATUS' and make sure your filters are up to date.")    
         messages.append("As always, thank you for your patience and support!")    
     elif input(Fore.YELLOW + "Everything is normal message? Y/N: " + Style.RESET_ALL) == "Y":
