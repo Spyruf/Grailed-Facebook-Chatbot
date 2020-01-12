@@ -26,6 +26,23 @@ load_dotenv()
 import requests
 from flask import Flask, request
 
+
+def log(msg, *args, **kwargs):  # simple wrapper for logging to stdout on heroku
+    try:
+        if type(msg) is dict:
+            msg = json.dumps(msg)
+        else:
+            msg = str(msg).format(*args, **kwargs)
+            # msg = "test"
+        print(u"{}: {}".format(datetime.datetime.now(), msg))
+    except UnicodeEncodeError:
+        pass  # squash logging errors in case of non-ascii text
+    sys.stdout.flush()
+
+
+log(Fore.CYAN + "REDIS_URL IS: " + str(os.environ.get("REDIS_URL")) + Fore.RESET)
+log(Fore.CYAN + "Make sure this is up to date!"+ Fore.RESET)
+
 redis_db = redis.from_url(os.environ.get("REDIS_URL"), decode_responses=True)
 local = os.environ.get("LOCAL")
 
@@ -90,19 +107,6 @@ def send_message(recipient_id, message_text):
     if response.status_code != 200:
         log(Fore.RED + str(response.status_code) + Fore.RESET)
         print(Fore.RED + response.text + Fore.RESET)
-
-
-def log(msg, *args, **kwargs):  # simple wrapper for logging to stdout on heroku
-    try:
-        if type(msg) is dict:
-            msg = json.dumps(msg)
-        else:
-            msg = str(msg).format(*args, **kwargs)
-            # msg = "test"
-        print(u"{}: {}".format(datetime.datetime.now(), msg))
-    except UnicodeEncodeError:
-        pass  # squash logging errors in case of non-ascii text
-    sys.stdout.flush()
 
 
 def get_IDs():
