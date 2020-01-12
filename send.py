@@ -140,6 +140,7 @@ if __name__ == '__main__':
     elif input(Fore.YELLOW + "We are back message? Y/N: " + Style.RESET_ALL) == "Y":
         messages.append(
             "Grailed-Feed-Notifications is back! There were some changes from Grailed and Facebook that we were finally able to respond to and fix the bot.")
+        messages.append("Now is also a good time to run 'STATUS' and make sure your filters are up to date.")    
         messages.append("As always, thank you for your patience and support!")    
     elif input(Fore.YELLOW + "Everything is normal message? Y/N: " + Style.RESET_ALL) == "Y":
         messages.append(

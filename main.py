@@ -119,7 +119,7 @@ class CheckerGrailed:
             html = self.driver.page_source  # get raw html
             soup = bs(html, "html.parser")  # convert to soup
 
-            if "Currently no items fit this criteria." in html:
+            if "couldn't find any listings" in html:
                 log(Fore.YELLOW + "no items fit this criteria." + Style.RESET_ALL)
                 if local == "0":
                     redis_db.delete(self.name)  # remove all former old item only if in production
