@@ -164,7 +164,7 @@ class CheckerGrailed:
                     log(Fore.MAGENTA + "Number of new items: " + str(len(diff)) + Style.RESET_ALL)
 
                 if diff and self.run_before is True:
-                    if len(diff) < 40:
+                    if len(diff) < 40: #TODO: maybe fix this 
                         self.send_links(diff)
                 elif self.run_before is False:
                     log(Fore.MAGENTA + "First Time being run so ignoring sending items" + Style.RESET_ALL)
@@ -532,7 +532,7 @@ def exists(sender_id, url):
 
 
 def help_message(sender_id):
-    send_message(sender_id, "Send a Grailed Feed link to monitor\nIt should look like this grailed.com/feed/1234abc")
+    send_message(sender_id, "Send a Grailed Feed link to monitor\nIt should look like this grailed.com/shop/1234abc")
     send_message(sender_id, "Send STATUS to see what links are being monitored")
     send_message(sender_id, "Send RESET to stop monitoring all links")
 
