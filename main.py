@@ -162,7 +162,7 @@ class CheckerGrailed:
 
                 if len(diff) > 0:
                     log(Fore.MAGENTA + "Number of new items: " + str(len(diff)) + Style.RESET_ALL)
-                    log(Fore.MAGENTA + "Run Before: " + self.run_before + Style.RESET_ALL)
+                    log(Fore.MAGENTA + "Run Before: " + str(self.run_before) + Style.RESET_ALL)
 
                 if diff and self.run_before is True:
                     if len(diff) < 40: #TODO: maybe fix this 
