@@ -164,9 +164,14 @@ class CheckerGrailed:
                     log(Fore.MAGENTA + "Number of new items: " + str(len(diff)) + Style.RESET_ALL)
                     log(Fore.MAGENTA + "Run Before: " + str(self.run_before) + Style.RESET_ALL)
 
-                if diff and self.run_before is True and len(diff) < 40:
+                print(diff == True)
+                print(self.run_before is True)
+                print(len(diff) < 40)
+                if diff and self.run_before == True and len(diff) < 40:
+                    print("before send links")
                     self.send_links(diff)
-                elif self.run_before is False:
+                    print("after send links")
+                elif self.run_before == False:
                     log(Fore.MAGENTA + "First Time being run so ignoring sending items" + Style.RESET_ALL)
                     redis_db.set(self.url, 1)
                     self.run_before = True
