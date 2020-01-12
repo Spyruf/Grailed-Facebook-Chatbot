@@ -162,6 +162,7 @@ class CheckerGrailed:
 
                 if len(diff) > 0:
                     log(Fore.MAGENTA + "Number of new items: " + str(len(diff)) + Style.RESET_ALL)
+                    log(Fore.MAGENTA + "Run Before: " + self.run_before + Style.RESET_ALL)
 
                 if diff and self.run_before is True:
                     if len(diff) < 40: #TODO: maybe fix this 
@@ -197,6 +198,7 @@ class CheckerGrailed:
         # log(Fore.YELLOW + "Stopped Checking" + Style.RESET_ALL)
 
     def send_links(self, diff):
+        log(Fore.MAGENTA + "Running send_links" + Style.RESET_ALL)
         send_message(self.sender_id, "New Items!")
         for item in diff:
             if self.running is False:
