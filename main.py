@@ -165,7 +165,7 @@ class CheckerGrailed:
                     log(Fore.MAGENTA + "Run Before: " + str(self.run_before) + Style.RESET_ALL)
 
                 print(diff == True)
-                print(self.run_before is True)
+                print(self.run_before == True)
                 print(len(diff) < 40)
                 if diff and self.run_before == True and len(diff) < 40:
                     print("before send links")
