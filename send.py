@@ -137,16 +137,17 @@ if __name__ == '__main__':
     if input(Fore.YELLOW + "Custom Message? Y/N: " + Style.RESET_ALL) == "Y":
         messages.append(
             input(Fore.YELLOW + "What message would you like to send?\n" + Style.RESET_ALL))
+    elif input(Fore.YELLOW + "We are back message? Y/N: " + Style.RESET_ALL) == "Y":
+        messages.append(
+            "Grailed-Feed-Notifications is back! There were some changes from Grailed and Facebook that we were finally able to respond to and fix the bot.")
+        messages.append("As always, thank you for your patience and support!")    
     elif input(Fore.YELLOW + "Everything is normal message? Y/N: " + Style.RESET_ALL) == "Y":
         messages.append(
-            "Grailed-Feed-Notifications is back to running normally! Version 2.0 was released yesterday which features a more accurate way of determining new items and other general optimizations!")
+            "Grailed-Feed-Notifications is back to running normally! ")
         messages.append("As always, thank you for your patience and support!")
     else:
-        messages.append(
-            "Due to a recent bug with incorrect/repeat items being sent, a max of 5 new item will be sent on each feed check. Sorry for this inconvenience, these issues will be resolved shortly.")
-        messages.append(
-            "If you have a specific issue and would like to leave detailed feedback, please do so here: https://goo.gl/forms/jcWFG9l0Gs7B3o402")
-        messages.append("Thank you for your patience and support!")
+        log(Fore.YELLOW + "Exiting!" + Style.RESET_ALL)
+        exit()
 
     log(Fore.YELLOW + "The message is: " + Style.RESET_ALL)
     for item in messages:
