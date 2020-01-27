@@ -243,6 +243,7 @@ def add_to_queue(id, url):
     # add to redis
     redis_db.sadd('tasks', str(id) + "|" + url)  # values in tasks are the Checker object names
 
+
     # create task object, add to tasks, add to queue
     if "grailed" in url:
         task = CheckerGrailed(id, url)
@@ -250,11 +251,6 @@ def add_to_queue(id, url):
         queue.add(task)
         log(Fore.LIGHTCYAN_EX + "Added new checker to queue" + Style.RESET_ALL)
 
-    # Mercari
-    # elif "mercari" in url:
-    #     task = CheckerMercari(id, url)
-    #     tasks.add(task)
-    #     queue.add(task)
 
 
 def run_queue():
@@ -471,12 +467,12 @@ def send_message(recipient_id, message_text):
 
     if response.status_code != 200:
         log(Fore.RED + "Error Code: " + str(response.status_code) + " recipient_id: " + str(recipient_id) + Fore.RESET)
-        # Take the recipient ID
-        # Find all related links
-        # Go to the tasks, find all the smembers, remove the smembers that start with recipient ID
-        # remove all the links from the queue / REDIS database
-
         print(Fore.RED + response.text + Fore.RESET)
+        
+        reset_string = "This person isn't available right now"
+        if reset_string in response.text:
+            print(Fore.RED + "----------Resetting----------" + Fore.RESET)
+            reset(recipient_id)
 
 
 # Flask App Routes
