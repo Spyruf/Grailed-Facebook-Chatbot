@@ -471,8 +471,9 @@ def send_message(recipient_id, message_text):
         
         reset_string = "This person isn't available right now"
         if reset_string in response.text:
-            print(Fore.RED + "----------Resetting----------" + Fore.RESET)
-            reset(recipient_id)
+            #FIXME: yeah this doesn't work rip
+            print(Fore.RED + "----------FAKE Resetting----------" + Fore.RESET)
+            # reset(recipient_id)
 
 
 # Flask App Routes
