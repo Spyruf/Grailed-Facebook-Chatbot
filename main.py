@@ -164,7 +164,7 @@ class CheckerGrailed:
                     log(Fore.MAGENTA + "Number of new items: " + str(len(diff)) + Style.RESET_ALL)
                     log(Fore.MAGENTA + "Run Before: " + str(self.run_before) + Style.RESET_ALL)
 
-                print(diff == True)
+
                 print(self.run_before == True)
                 print(len(diff) < 40)
                 if diff and self.run_before == True and len(diff) < 40:
